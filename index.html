@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Generador de presentaciones PowerPoint gratuito con Inteligencia Artificial. Crea diapositivas, textos e imágenes con IA en segundos.">
     
-    <!-- FAVICON PREMIUM: Icono SVG incrustado con degradado corporativo -->
+    <!-- FAVICON PREMIUM -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f97316'/%3E%3Cstop offset='100%25' stop-color='%23db2777'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='120' fill='url(%23g)'/%3E%3Crect x='100' y='140' width='312' height='200' rx='20' fill='white'/%3E%3Cpath d='M256 340v80m-60 0h120' stroke='white' stroke-width='40' stroke-linecap='round' opacity='0.9'/%3E%3C/svg%3E" type="image/svg+xml">
     
-    <title>genpptx</title>
+    <title>genpptx - Generador de PPT con IA</title>
     
-    <!-- 1. MOTOR POWERPOINT -->
+    <!-- LIBRERÍAS -->
     <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
-    
-    <!-- 2. ESTILOS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
         /* Base */
-        body { -webkit-tap-highlight-color: transparent; min-height: 100vh; }
+        body { -webkit-tap-highlight-color: transparent; min-height: 100vh; scroll-behavior: smooth; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -29,133 +28,226 @@
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
         @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
-        /* Loader de Imagen */
         .img-loader {
             background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
         }
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        /* ESTILOS DE LA BARRA DE CARGA */
-        .progress-bar-container {
-            width: 240px;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 99px;
-            overflow: hidden;
-            margin-top: 16px;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #f97316, #ea580c);
-            width: 0%;
-            transition: width 0.4s ease-out;
-            border-radius: 99px;
-        }
+        /* Barra de Progreso */
+        .progress-bar-container { width: 240px; height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; margin-top: 16px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #f97316, #ea580c); width: 0%; transition: width 0.4s ease-out; border-radius: 99px; }
     </style>
 </head>
 <body class="bg-slate-50 flex flex-col font-sans text-slate-800">
 
-    <!-- HEADER -->
-    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sticky top-0 z-30 shadow-sm shrink-0">
-        <div class="flex items-center gap-2">
-            <div class="bg-gradient-to-br from-orange-500 to-pink-500 text-white p-2 rounded-lg shadow-sm cursor-pointer hover:scale-105 transition-transform" onclick="openSettings()">
-                <i data-lucide="palette" class="w-5 h-5"></i>
+    <!-- HEADER / NAVBAR -->
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-sm shrink-0">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="window.scrollTo(0,0)">
+            <div class="bg-gradient-to-br from-orange-500 to-pink-500 text-white p-2 rounded-lg shadow-sm">
+                <i data-lucide="layout-template" class="w-5 h-5"></i>
             </div>
             <div>
-                <h1 class="font-bold text-sm leading-tight">genpptx</h1>
+                <h1 class="font-bold text-lg leading-tight tracking-tight">genpptx</h1>
+                <!-- INDICADOR DE ESTADO REINTEGRADO -->
                 <p class="text-[10px] text-slate-400 font-medium flex items-center gap-1">
                     <span id="hfStatus" class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
-                    Director de Arte IA
+                    IA Ready
                 </p>
             </div>
         </div>
-        <button onclick="downloadPPT()" class="bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 active:bg-slate-700 shadow-lg active:scale-95 transition-transform">
-            <i data-lucide="download" class="w-4 h-4"></i> <span class="hidden sm:inline">Descargar</span>
-        </button>
+        
+        <!-- Navegación Desktop -->
+        <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
+            <a href="#como-funciona" class="hover:text-orange-600 transition-colors">Cómo funciona</a>
+            <a href="#caracteristicas" class="hover:text-orange-600 transition-colors">Características</a>
+            <button onclick="openModal('contact')" class="hover:text-orange-600 transition-colors">Contacto</button>
+            <button onclick="openSettings()" class="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full transition-colors text-slate-700">
+                <i data-lucide="settings" class="w-4 h-4"></i> Config
+            </button>
+        </nav>
+
+        <!-- Botón Móvil -->
+        <div class="md:hidden flex items-center gap-3">
+             <button onclick="openSettings()" class="text-slate-600"><i data-lucide="settings" class="w-5 h-5"></i></button>
+        </div>
     </header>
 
-    <!-- ÁREA PRINCIPAL -->
-    <main class="flex-1 flex flex-col w-full max-w-5xl mx-auto p-4 gap-6">
+    <!-- ÁREA PRINCIPAL DE LA APP -->
+    <main class="flex-1 flex flex-col w-full max-w-5xl mx-auto p-4 gap-6 min-h-[85vh]">
         
+        <!-- Hero Section de la App -->
+        <div class="text-center py-6 md:py-10 space-y-2">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Crea presentaciones en segundos</h2>
+            <p class="text-slate-500 max-w-lg mx-auto">La Inteligencia Artificial diseña, escribe y genera imágenes para tus diapositivas automáticamente.</p>
+        </div>
+
         <!-- Panel de Input -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sticky top-20 z-20">
-            <div class="flex flex-col sm:flex-row gap-3">
-                <input type="text" id="topicInput" placeholder="Ej: La vida en el fondo del mar..." class="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-orange-500 transition-all">
-                <button onclick="generateDeck()" class="bg-orange-600 text-white px-6 py-3 rounded-lg font-bold text-sm shadow-md active:scale-95 transition-transform flex items-center justify-center gap-2 sm:w-auto w-full">
-                    <i data-lucide="sparkles" class="w-4 h-4"></i> Generar
+        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-1 sticky top-20 z-20 mx-auto w-full max-w-2xl ring-1 ring-slate-900/5">
+            <div class="flex flex-col sm:flex-row gap-1 p-1">
+                <input type="text" id="topicInput" placeholder="¿Sobre qué quieres tu presentación? Ej: Marketing Digital..." class="flex-1 bg-transparent border-0 rounded-lg px-4 py-3 text-base outline-none focus:ring-0 placeholder:text-slate-400">
+                <button onclick="generateDeck()" class="bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-500 hover:to-pink-500 text-white px-8 py-3 rounded-lg font-bold text-sm shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 sm:w-auto w-full">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i> <span class="hidden sm:inline">Generar PPT</span><span class="sm:hidden">Generar</span>
                 </button>
             </div>
         </div>
         
         <!-- Canvas (Vista Previa) -->
-        <div class="w-full flex flex-col items-center gap-4">
-            <div class="w-full relative group">
-                <div id="canvas" class="aspect-video w-full bg-white shadow-xl rounded-sm flex overflow-hidden ring-1 ring-slate-900/5 transition-all relative">
+        <div class="w-full flex flex-col items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div class="w-full relative group shadow-2xl rounded-lg">
+                <div id="canvas" class="aspect-video w-full bg-white rounded-lg flex overflow-hidden ring-1 ring-slate-900/10 transition-all relative">
                     <!-- Contenido Slide -->
+                    <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-50">
+                        <i data-lucide="presentation" class="w-16 h-16 mb-4 opacity-20"></i>
+                        <p class="text-sm font-medium opacity-60">Tu presentación aparecerá aquí</p>
+                    </div>
                 </div>
                 
-                <!-- Botón Regenerar Imagen (Manual) -->
-                <button onclick="regenerateImage()" id="btnRegenImg" class="absolute bottom-4 right-4 bg-black/50 hover:bg-black/70 backdrop-blur text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 z-10">
-                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> Nueva Imagen
-                </button>
+                <!-- Controles Flotantes -->
+                <div class="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <button onclick="regenerateImage()" class="bg-black/70 backdrop-blur text-white px-3 py-2 rounded-full text-xs font-bold hover:bg-black/90 transition-all flex items-center gap-2">
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> <span class="hidden sm:inline">Nueva Imagen</span>
+                    </button>
+                    <button onclick="downloadPPT()" class="bg-white text-slate-900 px-4 py-2 rounded-full text-xs font-bold shadow-lg hover:bg-slate-50 transition-all flex items-center gap-2">
+                        <i data-lucide="download" class="w-3 h-3"></i> Descargar .pptx
+                    </button>
+                </div>
             </div>
             
             <!-- Barra de Edición IA -->
-            <div class="w-full bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex gap-2 items-center ring-1 ring-indigo-50">
-                <div class="bg-indigo-50 p-2.5 rounded-lg text-indigo-600 shrink-0"><i data-lucide="bot" class="w-5 h-5"></i></div>
-                <input type="text" id="editInput" placeholder="Ej: 'Pon el texto a la izquierda' o 'Cambia la imagen por...'" class="flex-1 bg-transparent text-sm px-2 py-2 outline-none text-slate-700 placeholder:text-slate-400" onkeydown="if(event.key === 'Enter') requestEdit()">
-                <button onclick="requestEdit()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm hover:bg-indigo-700 transition-colors">
-                    <i data-lucide="wand-2" class="w-3 h-3 inline mr-1"></i> Editar
+            <div class="w-full max-w-3xl bg-white p-2 rounded-full shadow-sm border border-slate-200 flex gap-2 items-center ring-1 ring-slate-100">
+                <div class="bg-indigo-50 p-2 rounded-full text-indigo-600 shrink-0 ml-1"><i data-lucide="bot" class="w-4 h-4"></i></div>
+                <input type="text" id="editInput" placeholder="Pide cambios a la IA: 'Cambia el fondo a azul', 'Resume el texto'..." class="flex-1 bg-transparent text-sm px-2 outline-none text-slate-700 placeholder:text-slate-400" onkeydown="if(event.key === 'Enter') requestEdit()">
+                <button onclick="requestEdit()" class="bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-slate-800 transition-colors">
+                    Editar
                 </button>
             </div>
         </div>
 
         <!-- Tira de Miniaturas -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 overflow-hidden">
-            <h3 class="text-xs font-bold text-slate-500 mb-3 flex justify-between items-center">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 overflow-hidden mb-8">
+            <h3 class="text-xs font-bold text-slate-500 mb-3 flex justify-between items-center px-1">
                 <span>Diapositivas</span>
+                <span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-400">Vista Previa</span>
             </h3>
-            <div id="slidesStrip" class="flex gap-3 overflow-x-auto pb-2 min-h-[80px]">
-                <!-- Miniaturas -->
+            <div id="slidesStrip" class="flex gap-3 overflow-x-auto pb-2 min-h-[80px] scrollbar-hide">
+                <!-- Miniaturas se generan aquí -->
             </div>
         </div>
-        <div class="h-10"></div>
+        
+        <!-- SECCIÓN SEO: CONTENIDO PARA ADSENSE -->
+        <article class="max-w-4xl mx-auto prose prose-slate prose-sm md:prose-base mt-12 mb-20 px-4">
+            <hr class="border-slate-200 mb-12">
+            
+            <h2 id="como-funciona" class="text-2xl font-bold text-slate-800 mb-4">¿Cómo funciona genpptx?</h2>
+            <p>
+                <strong>genpptx</strong> es una herramienta avanzada que combina la potencia de modelos de lenguaje grandes (como Gemini) con generadores de imágenes de última generación (SDXL) para automatizar la creación de presentaciones profesionales.
+            </p>
+            <p>
+                A diferencia de las plantillas tradicionales, nuestra IA analiza tu tema y estructura una narrativa completa: desde la introducción hasta las conclusiones. No solo escribe el texto, sino que actúa como un <em>Director de Arte</em> digital, decidiendo qué diseño visual (layout) se adapta mejor a cada diapositiva y generando imágenes únicas y libres de derechos para ilustrar tus ideas.
+            </p>
+
+            <h3 id="caracteristicas" class="text-xl font-bold text-slate-800 mt-8 mb-3">Características Principales</h3>
+            <ul class="list-disc pl-5 space-y-2 text-slate-600">
+                <li><strong>Generación Instantánea:</strong> Obtén una presentación de 6-10 diapositivas en menos de un minuto.</li>
+                <li><strong>Imágenes con IA (SDXL):</strong> Cada diapositiva incluye imágenes generadas artificialmente y adaptadas al contexto del texto.</li>
+                <li><strong>Edición Conversacional:</strong> ¿No te gusta algo? Simplemente chatea con la IA ("Pon la imagen a la izquierda", "Haz el texto más corto") y verás los cambios al instante.</li>
+                <li><strong>Exportación Nativa:</strong> Descarga el resultado final en formato <code>.pptx</code> editable, compatible con Microsoft PowerPoint, Google Slides y Keynote.</li>
+                <li><strong>Privacidad Primero:</strong> No almacenamos tus datos. Todo el proceso ocurre en tu navegador y mediante conexiones seguras a las APIs.</li>
+            </ul>
+
+            <h3 class="text-xl font-bold text-slate-800 mt-8 mb-3">Preguntas Frecuentes</h3>
+            <div class="space-y-4">
+                <details class="group bg-slate-50 p-4 rounded-lg cursor-pointer">
+                    <summary class="font-bold text-slate-700 list-none flex justify-between items-center">
+                        ¿Es gratuito usar genpptx?
+                        <span class="transition group-open:rotate-180"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>
+                    </summary>
+                    <p class="text-slate-600 mt-2 text-sm">Sí, la herramienta básica es de uso gratuito. Utilizamos tokens de APIs públicas para democratizar el acceso a la creación de contenido con IA.</p>
+                </details>
+                <details class="group bg-slate-50 p-4 rounded-lg cursor-pointer">
+                    <summary class="font-bold text-slate-700 list-none flex justify-between items-center">
+                        ¿Las imágenes tienen derechos de autor?
+                        <span class="transition group-open:rotate-180"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>
+                    </summary>
+                    <p class="text-slate-600 mt-2 text-sm">Las imágenes generadas por IA (Stable Diffusion XL) son generalmente libres de derechos de autor y pueden usarse para fines personales o comerciales, aunque te recomendamos revisar las leyes locales sobre arte generativo.</p>
+                </details>
+            </div>
+        </article>
+
     </main>
 
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-10">
+        <div class="max-w-5xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
+            <div>
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="bg-slate-900 text-white p-1.5 rounded">
+                        <i data-lucide="layout-template" class="w-4 h-4"></i>
+                    </div>
+                    <span class="font-bold text-slate-800">genpptx</span>
+                </div>
+                <p class="text-slate-500 mb-4">Transformando ideas en presentaciones visuales con el poder de la Inteligencia Artificial.</p>
+                <p class="text-slate-400 text-xs">© 2024 genpptx. Todos los derechos reservados.</p>
+            </div>
+            
+            <div>
+                <h4 class="font-bold text-slate-800 mb-4">Producto</h4>
+                <ul class="space-y-2 text-slate-500">
+                    <li><a href="#" class="hover:text-orange-600">Generador PPT</a></li>
+                    <li><a href="#" class="hover:text-orange-600">Editor IA</a></li>
+                    <li><a href="#" class="hover:text-orange-600">Galería de Prompts</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-slate-800 mb-4">Legal</h4>
+                <ul class="space-y-2 text-slate-500">
+                    <li><button onclick="openModal('privacy')" class="hover:text-orange-600">Política de Privacidad</button></li>
+                    <li><button onclick="openModal('terms')" class="hover:text-orange-600">Términos de Uso</button></li>
+                    <li><button onclick="openModal('contact')" class="hover:text-orange-600">Contacto</button></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODALES (Settings, Privacy, Terms, Contact) -->
+    
     <!-- Modal Configuración -->
-    <div id="settingsModal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
+    <div id="settingsModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
         <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
-            <button onclick="closeSettings()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-            <h3 class="font-bold text-lg mb-1">Configuración IA</h3>
+            <button onclick="closeModal('settingsModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <h3 class="font-bold text-lg mb-1 text-slate-800">Configuración IA</h3>
             <p class="text-xs text-slate-500 mb-4">Token configurado automáticamente.</p>
-            
             <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Hugging Face Token</label>
-            <input type="password" id="hfTokenInput" value="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" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm mb-2 outline-none focus:border-orange-500">
-            
-            <button onclick="saveSettings()" class="w-full bg-slate-900 text-white py-3 rounded-lg font-bold shadow-lg">Guardar Configuración</button>
+            <input type="password" id="hfTokenInput" value="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" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm mb-2 outline-none focus:border-orange-500 text-slate-600">
+            <button onclick="saveSettings()" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-lg font-bold shadow-lg mt-2 transition-colors">Guardar</button>
         </div>
     </div>
 
-    <!-- OVERLAY DE CARGA CON BARRA DE PROGRESO -->
+    <!-- Modal Genérico para Texto Legal -->
+    <div id="legalModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+        <div class="bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl relative max-h-[80vh] overflow-y-auto">
+            <button onclick="closeModal('legalModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div id="legalContent" class="prose prose-sm prose-slate">
+                <!-- Contenido dinámico aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- OVERLAY DE CARGA -->
     <div id="loaderOverlay" class="fixed inset-0 bg-white/95 z-50 hidden flex-col items-center justify-center backdrop-blur-sm transition-opacity duration-500">
         <div class="w-16 h-16 border-4 border-slate-200 border-t-orange-500 rounded-full animate-spin mb-6"></div>
         <h3 class="text-xl font-bold text-slate-800" id="loaderTitle">Iniciando...</h3>
-        <!-- Subtítulo dinámico, vacío por defecto -->
         <p class="text-sm text-slate-500 mt-2 font-medium" id="loaderText">Conectando...</p>
-        
-        <!-- Barra de Progreso Añadida -->
         <div class="progress-bar-container">
             <div id="progressBarFill" class="progress-bar-fill"></div>
         </div>
         <p class="text-[10px] text-slate-400 mt-2" id="progressPercent">0%</p>
     </div>
 
+    <!-- TOAST -->
     <div id="toastContainer" class="fixed bottom-4 left-4 right-4 z-50 pointer-events-none flex flex-col gap-2 items-center"></div>
 
     <script>
@@ -165,24 +257,52 @@
         let HF_TOKEN = localStorage.getItem('ppt_hf_token') || PRECONFIGURED_HF_TOKEN;
 
         // --- ESTADO ---
-        let slides = [{
-            id:0, type:'title', title:'Hola', 
-            content:'1. Escribe un tema.\n2. La IA decidirá automáticamente el diseño (layout) y las imágenes.\n3. Puedes pedirle cambios con la barra de abajo.', 
-            bg:'#ffffff', text:'#1e293b',
-            imagePrompt: null, imageData: null, layout: 'split_right'
-        }];
+        let slides = [];
         let activeIndex = 0;
         let pptTitle = "Presentación";
+
+        // --- CONTENIDO LEGAL (Para inyectar en el modal) ---
+        const legalTexts = {
+            privacy: `
+                <h2>Política de Privacidad</h2>
+                <p>En genpptx, valoramos tu privacidad. Esta política explica cómo manejamos tu información.</p>
+                <h3>Recopilación de Datos</h3>
+                <p>No recopilamos ni almacenamos datos personales en nuestros servidores. Toda la generación de contenido ocurre en tiempo real y se procesa mediante APIs seguras. No guardamos tus presentaciones ni tus textos.</p>
+                <h3>Cookies</h3>
+                <p>Utilizamos almacenamiento local (LocalStorage) en tu navegador únicamente para recordar tu configuración de API Token, si decides cambiarla. No usamos cookies de rastreo publicitario intrusivo.</p>
+                <h3>Servicios de Terceros</h3>
+                <p>Utilizamos las APIs de Google Gemini y Hugging Face para generar contenido. Al usar esta herramienta, aceptas que los prompts (textos) que envías sean procesados por estos servicios únicamente para generar el resultado solicitado.</p>
+            `,
+            terms: `
+                <h2>Términos de Uso</h2>
+                <p>Al utilizar genpptx, aceptas los siguientes términos:</p>
+                <ul>
+                    <li>El servicio se proporciona "tal cual", sin garantías de disponibilidad absoluta.</li>
+                    <li>Eres responsable del contenido que generas. No permitimos el uso de la herramienta para crear contenido ilegal, ofensivo o dañino.</li>
+                    <li>Las imágenes y textos generados por IA son para tu uso, pero no garantizamos la exclusividad de los mismos.</li>
+                </ul>
+            `,
+            contact: `
+                <h2>Contacto</h2>
+                <p>¿Tienes alguna duda o sugerencia? Nos encantaría escucharte.</p>
+                <p>Puedes escribirnos directamente a:</p>
+                <p class="font-bold text-lg text-indigo-600">soporte@genpptx.com</p>
+                <p class="text-sm text-slate-500 mt-4">(Nota: Este es un correo de demostración para el sitio).</p>
+            `
+        };
 
         window.onload = () => {
             lucide.createIcons();
             updateStatus();
-            render();
             document.getElementById('hfTokenInput').value = HF_TOKEN;
         };
 
+        // --- INTERFAZ & MODALES ---
         function updateStatus() {
             const el = document.getElementById('hfStatus');
+            // Protección contra null: si el elemento no existe, salimos sin error
+            if (!el) return;
+
             if(HF_TOKEN) {
                 el.classList.replace('bg-red-400', 'bg-green-500');
                 el.classList.add('animate-pulse');
@@ -192,483 +312,302 @@
             }
         }
 
+        function openModal(type) {
+            if(type === 'settingsModal') { // Fix para el botón de config viejo
+                document.getElementById('settingsModal').classList.remove('hidden');
+                document.getElementById('settingsModal').classList.add('flex');
+                return;
+            }
+
+            const modal = document.getElementById('legalModal');
+            const content = document.getElementById('legalContent');
+            if(legalTexts[type]) {
+                content.innerHTML = legalTexts[type];
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+        
+        function openSettings() {
+             document.getElementById('settingsModal').classList.remove('hidden');
+             document.getElementById('settingsModal').classList.add('flex');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            document.getElementById(id).classList.remove('flex');
+        }
+
+        function saveSettings() {
+            const token = document.getElementById('hfTokenInput').value.trim();
+            if(token) { localStorage.setItem('ppt_hf_token', token); HF_TOKEN = token; showToast("Token Guardado"); }
+            updateStatus(); closeModal('settingsModal');
+        }
+
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const el = document.createElement('div');
-            const bgClass = type === 'error' ? 'bg-red-600' : 'bg-slate-800';
+            const bgClass = type === 'error' ? 'bg-red-600' : 'bg-slate-900';
             el.className = `${bgClass} text-white px-4 py-3 rounded-lg shadow-lg text-xs font-bold toast-enter max-w-sm text-center pointer-events-auto`;
             el.innerText = message;
             container.appendChild(el);
             setTimeout(() => el.remove(), 4000);
         }
 
-        // --- HELPERS JSON ROBUSTO ---
+        // --- LÓGICA CORE ---
         function cleanAndParseJSON(text) {
-            // Encuentra el primer { y el último } para aislar el JSON de cualquier texto extra
             const first = text.indexOf('{');
             const last = text.lastIndexOf('}');
-            
-            if (first === -1 || last === -1) {
-                throw new Error("No se encontró JSON válido en la respuesta.");
-            }
-            
-            const clean = text.substring(first, last + 1);
-            return JSON.parse(clean);
+            if (first === -1 || last === -1) throw new Error("JSON inválido");
+            return JSON.parse(text.substring(first, last + 1));
         }
 
-        // --- GEMINI API ---
         async function callGemini(prompt) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_KEY}`;
-            
             let attempts = 0;
-            const maxAttempts = 4;
-            const delays = [1000, 2500, 5000, 8000];
-
-            while (attempts < maxAttempts) {
+            while (attempts < 3) {
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                     });
-
                     if (response.ok) {
                         const data = await response.json();
                         return data.candidates[0].content.parts[0].text;
-                    } else if (response.status === 503 || response.status === 429) {
-                         console.warn(`Gemini ocupado (${response.status}), reintentando...`);
-                    } else {
-                        throw new Error(`Gemini Error (${response.status})`);
                     }
-                } catch (error) {
-                    console.warn(`Intento ${attempts + 1} falló: ${error.message}`);
-                    if (attempts === maxAttempts - 1) throw error;
-                }
-                await new Promise(r => setTimeout(r, delays[attempts]));
+                } catch (e) { console.warn(e); }
+                await new Promise(r => setTimeout(r, 1000));
                 attempts++;
             }
-            throw new Error("IA no disponible. Intenta de nuevo.");
+            throw new Error("IA no disponible");
         }
 
         // --- IMÁGENES ---
         async function generateImageSmart(prompt) {
-            let b64 = null;
             if(HF_TOKEN) {
-                try {
-                    b64 = await generateImageHF(prompt);
-                    if(b64) return b64;
-                } catch(e) { console.warn("HF falló, probando respaldo...", e); }
+                try { return await generateImageHF(prompt); } catch(e) {}
             }
-            try {
-                b64 = await generateImagePollinations(prompt);
-                if(b64) return b64;
-            } catch(e) {
-                console.warn("Pollinations falló, usando local...", e);
-            }
+            try { return await generateImagePollinations(prompt); } catch(e) {}
             return generateImageFallback(prompt);
         }
 
         async function generateImageHF(prompt) {
-            const url = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
-            const response = await fetch(url, {
+            const response = await fetch("https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0", {
                 method: "POST",
                 headers: { "Authorization": `Bearer ${HF_TOKEN}`, "Content-Type": "application/json" },
                 body: JSON.stringify({ inputs: prompt + ", photorealistic, 8k, high quality" }),
             });
             if (!response.ok) throw new Error("HF Error");
-            const blob = await response.blob();
-            return blobToBase64(blob);
+            return blobToBase64(await response.blob());
         }
 
         async function generateImagePollinations(prompt) {
             const seed = Math.floor(Math.random() * 10000);
-            const encoded = encodeURIComponent(prompt + " realistic corporate");
-            const url = `https://image.pollinations.ai/prompt/${encoded}?width=1024&height=576&nologo=true&seed=${seed}`;
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=576&nologo=true&seed=${seed}`;
             const response = await fetch(url);
             if (!response.ok) throw new Error("Pollinations Error");
-            const blob = await response.blob();
-            return blobToBase64(blob);
+            return blobToBase64(await response.blob());
         }
 
         function generateImageFallback(prompt) {
             const canvas = document.createElement('canvas');
-            canvas.width = 1024;
-            canvas.height = 576;
+            canvas.width = 1024; canvas.height = 576;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#f1f5f9';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = '#e2e8f0';
-            ctx.lineWidth = 2;
-            for(let i=0; i<canvas.width; i+=40) {
-                ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i, canvas.height); ctx.stroke();
-            }
-            ctx.fillStyle = '#cbd5e1';
-            ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2 - 40, 60, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#64748b';
-            ctx.font = 'bold 30px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('Imagen no disponible', canvas.width/2, canvas.height/2 + 50);
+            ctx.fillStyle = '#f1f5f9'; ctx.fillRect(0,0,1024,576);
+            ctx.fillStyle = '#94a3b8'; ctx.font = '30px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('Imagen no disponible', 512, 288);
             return canvas.toDataURL('image/jpeg');
         }
 
         function blobToBase64(blob) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.onloadend = () => resolve(reader.result);
-                reader.onerror = reject;
                 reader.readAsDataURL(blob);
             });
         }
 
-        // --- MANEJO DE LA BARRA DE CARGA ---
+        // --- BARRA DE PROGRESO ---
         function updateProgressBar(percent, title, subtitle) {
-            const fill = document.getElementById('progressBarFill');
-            const percentText = document.getElementById('progressPercent');
-            const titleEl = document.getElementById('loaderTitle');
-            const textEl = document.getElementById('loaderText');
-            
-            fill.style.width = `${percent}%`;
-            percentText.innerText = `${percent}%`;
-            
-            if (title) titleEl.innerText = title;
-            if (subtitle) textEl.innerText = subtitle;
+            document.getElementById('progressBarFill').style.width = `${percent}%`;
+            document.getElementById('progressPercent').innerText = `${percent}%`;
+            if (title) document.getElementById('loaderTitle').innerText = title;
+            if (subtitle) document.getElementById('loaderText').innerText = subtitle;
         }
 
-        // --- GENERADOR PRINCIPAL ---
+        function showLoader(show, text) {
+            const overlay = document.getElementById('loaderOverlay');
+            overlay.classList.toggle('hidden', !show);
+            overlay.classList.toggle('flex', show);
+            if(text) document.getElementById('loaderTitle').innerText = text;
+        }
+
+        // --- GENERADOR ---
         async function generateDeck() {
             const topic = document.getElementById('topicInput').value.trim();
-            if(!topic) return showToast("Escribe un tema", 'error');
+            if(!topic) return showToast("Escribe un tema primero", 'error');
             
-            // INICIO CARGA
             showLoader(true);
-            updateProgressBar(10, "Iniciando...", "Analizando tu tema...");
+            updateProgressBar(10, "Iniciando IA...", "Analizando tema...");
 
             try {
-                const prompt = `
-                    Actúa como diseñador experto. Crea 6 slides sobre: "${topic}".
-                    NO índices. Estructura: Portada -> Intro -> Desarrollo -> Conclusión.
-                    
-                    Para CADA slide, decide:
-                    1. "imagePrompt": Descripción visual EN INGLÉS para la imagen (o null si no lleva).
-                    2. "layout": Elige el mejor diseño visual:
-                       - "background" (Imagen fondo completo, texto encima) -> Ideal Portadas/Impacto.
-                       - "split_right" (Texto Izq, Imagen Der) -> Estándar.
-                       - "split_left" (Imagen Izq, Texto Der) -> Variedad.
-                       - "classic" (Solo texto, sin imagen) -> Conceptos abstractos.
-                    
-                    Responde SOLO con el objeto JSON válido. SIN texto extra ni introducciones.
-                    {
-                        "title": "Titulo", 
-                        "slides": [
-                            {
-                                "title": "...", 
-                                "content": "...", 
-                                "imagePrompt": "...",
-                                "layout": "split_right"
-                            }
-                        ]
-                    }
-                `;
+                const prompt = `Actúa como diseñador. Crea 6 slides sobre: "${topic}". NO indices.
+                Para CADA slide:
+                1. "imagePrompt": Descripción visual en Inglés (o null).
+                2. "layout": "background" (portada), "split_right", "split_left", "classic".
+                Responde JSON: { "title": "Titulo", "slides": [{ "title": "...", "content": "...", "imagePrompt": "...", "layout": "..." }] }`;
 
                 const rawText = await callGemini(prompt);
-                
                 updateProgressBar(30, "Estructurando...", "Diseñando diapositivas...");
                 
-                // Usamos la nueva función de limpieza robusta
                 const data = cleanAndParseJSON(rawText);
-
-                const theme = getRandomProfessionalTheme();
+                const theme = { bg: '#ffffff', text: '#1e293b', accent: '#f97316' };
                 pptTitle = data.title;
 
-                slides = data.slides.map((s, i) => ({ 
-                    ...s, 
-                    id: i, 
-                    bg: theme.bg, 
-                    text: theme.text, 
-                    lineColor: theme.accent,
-                    imageData: null, 
-                    imgLoading: false,
-                    layout: s.layout || 'split_right' // Fallback
-                }));
+                slides = data.slides.map((s, i) => ({ ...s, id: i, bg: theme.bg, text: theme.text, lineColor: theme.accent, imageData: null, imgLoading: false, layout: s.layout || 'split_right' }));
 
                 activeIndex = 0;
                 render();
-
-                // Aquí inicia la generación de imágenes síncrona visualmente (aunque async en código)
-                // NO ocultamos el loader todavía.
                 await startImageGenerationQueue();
 
-                // FINALIZAR
-                updateProgressBar(100, "¡Listo!", "Abriendo presentación...");
-                setTimeout(() => {
-                    showLoader(false);
-                }, 800);
+                updateProgressBar(100, "¡Listo!", "Presentación finalizada");
+                setTimeout(() => showLoader(false), 800);
 
             } catch (error) {
                 console.error(error);
-                showToast("Error generando texto: " + error.message, 'error');
+                showToast("Error: " + error.message, 'error');
                 showLoader(false);
             }
         }
 
-        // --- GENERACIÓN DE IMÁGENES CON PROGRESO VISUAL ---
         async function startImageGenerationQueue() {
-            // Calculamos cuántas slides tienen imagen
-            const totalImages = slides.filter(s => s.imagePrompt && s.layout !== 'classic').length;
-            let imagesDone = 0;
-            
-            if (totalImages === 0) return; // Si no hay imágenes, terminamos
-
-            const baseProgress = 30; // Empezamos desde el 30%
-            const remainingProgress = 70; // Nos queda el 70%
+            const total = slides.filter(s => s.imagePrompt && s.layout !== 'classic').length;
+            let done = 0;
+            if (total === 0) return;
 
             for (let i = 0; i < slides.length; i++) {
-                // Solo generar si hay prompt Y no es layout clásico (sin imagen)
                 if (slides[i].imagePrompt && !slides[i].imageData && slides[i].layout !== 'classic') {
-                    
-                    // Actualizar barra antes de empezar esta imagen
-                    const currentPercent = Math.round(baseProgress + ((imagesDone / totalImages) * remainingProgress));
-                    updateProgressBar(currentPercent, `Generando Imagen ${imagesDone + 1}/${totalImages}`, "Creando arte con IA...");
-                    
+                    updateProgressBar(30 + Math.round((done/total)*70), `Generando Imagen ${done+1}/${total}`, "Creando arte IA...");
                     slides[i].imgLoading = true;
-                    // Actualizar vista previa en segundo plano (opcional, para que se vea si el usuario espía)
                     if(i === activeIndex) render();
                     
-                    // Delay técnico
-                    await new Promise(r => setTimeout(r, 500));
-                    
-                    // Generar
-                    const b64 = await generateImageSmart(slides[i].imagePrompt);
-                    
-                    slides[i].imageData = b64;
+                    slides[i].imageData = await generateImageSmart(slides[i].imagePrompt);
                     slides[i].imgLoading = false;
-                    
-                    imagesDone++;
-                    
-                    // Actualizar vista previa
+                    done++;
                     if(i === activeIndex) render();
                 }
             }
             render();
         }
 
-        // --- EDITOR IA ---
         async function requestEdit() {
             const val = document.getElementById('editInput').value.trim();
             if(!val) return;
-            
             showLoader(true);
-            updateProgressBar(20, "Editando...", "Analizando cambios...");
+            updateProgressBar(20, "Editando...", "Procesando cambios...");
             
             const s = slides[activeIndex];
-            
             try {
-                const prompt = `
-                    Actúa como director de arte. Slide actual:
-                    - Texto: "${s.content}"
-                    - Imagen prompt: "${s.imagePrompt || 'Ninguna'}"
-                    - Layout actual: "${s.layout}"
-                    
-                    Instrucción usuario: "${val}"
-                    
-                    Tarea:
-                    1. Actualiza el texto si es necesario.
-                    2. Si pide cambiar imagen, genera NUEVO "imagePrompt" en Inglés.
-                    3. Si pide cambiar diseño, cambia el "layout".
-                    
-                    Responde ÚNICAMENTE con el JSON. Sin texto introductorio.
-                    { "content": "...", "imagePrompt": "...", "layout": "..." }
-                `;
-
-                const rawText = await callGemini(prompt);
+                const prompt = `Director de arte. Slide actual: "${s.content}". Prompt imagen: "${s.imagePrompt}". User: "${val}".
+                Responde JSON: { "content": "...", "imagePrompt": "...", "layout": "..." }`;
                 
-                // Usamos la limpieza robusta aquí también
-                const data = cleanAndParseJSON(rawText);
-                
+                const data = cleanAndParseJSON(await callGemini(prompt));
                 if(data.content) s.content = data.content;
                 if(data.layout) s.layout = data.layout;
-                
                 if(data.imagePrompt && data.imagePrompt !== "null") {
-                    updateProgressBar(50, "Creando imagen...", "Generando arte nuevo...");
+                    updateProgressBar(50, "Nueva imagen...", "Generando...");
                     s.imagePrompt = data.imagePrompt;
-                    s.imageData = null;
-                    s.imgLoading = true;
-                    
-                    const b64 = await generateImageSmart(data.imagePrompt);
-                    s.imageData = b64;
-                    s.imgLoading = false;
+                    s.imageData = await generateImageSmart(data.imagePrompt);
                 }
-                
-                updateProgressBar(100, "¡Editado!", "Actualizando vista...");
+                updateProgressBar(100, "¡Hecho!", "Actualizando...");
                 render();
                 document.getElementById('editInput').value = '';
                 setTimeout(() => showLoader(false), 500);
-
-            } catch (error) {
-                console.error(error);
-                showToast("Error al editar: " + error.message, 'error');
-                showLoader(false);
-            }
+            } catch(e) { showLoader(false); showToast("Error al editar", 'error'); }
         }
 
         async function regenerateImage() {
             const s = slides[activeIndex];
-            if(!s.imagePrompt) return showToast("Sin prompt de imagen", 'error');
-            if(s.layout === 'classic') return showToast("Cambia el layout primero para ver imagen", 'warning');
-            
+            if(!s.imagePrompt) return showToast("No hay prompt de imagen", 'error');
             showLoader(true);
-            updateProgressBar(30, "Regenerando...", "Creando nueva variación...");
-            
-            s.imageData = null;
-            s.imgLoading = true;
-            
-            const b64 = await generateImageSmart(s.imagePrompt);
-            s.imageData = b64;
-            s.imgLoading = false;
-            
+            updateProgressBar(40, "Regenerando...", "Variación artística...");
+            s.imageData = await generateImageSmart(s.imagePrompt);
             updateProgressBar(100, "¡Listo!", "Imagen actualizada");
             render();
             setTimeout(() => showLoader(false), 500);
         }
 
-        // --- RENDERIZADO ---
+        // --- RENDER ---
         function render() {
             const slide = slides[activeIndex];
             const canvas = document.getElementById('canvas');
             const strip = document.getElementById('slidesStrip');
 
+            if (!slide) { // Estado inicial vacío
+                return;
+            }
+
             canvas.innerHTML = '';
             canvas.style.backgroundColor = slide.bg;
             canvas.style.color = slide.text;
 
-            // Elemento de Imagen
-            let imageHTML = '';
-            if (slide.imgLoading) {
-                imageHTML = `<div class="w-full h-full img-loader flex items-center justify-center text-slate-400 text-xs font-bold uppercase tracking-widest">Creando Arte...</div>`;
-            } else if (slide.imageData) {
-                imageHTML = `<img src="${slide.imageData}" class="w-full h-full object-cover" />`;
-            } else {
-                imageHTML = `<div class="w-full h-full bg-black/5 flex items-center justify-center text-xs text-slate-300">Sin Imagen</div>`;
+            let imgHTML = '';
+            if (slide.imgLoading) imgHTML = `<div class="w-full h-full img-loader flex items-center justify-center text-slate-400 text-xs font-bold uppercase tracking-widest">Creando Arte...</div>`;
+            else if (slide.imageData) imgHTML = `<img src="${slide.imageData}" class="w-full h-full object-cover" />`;
+            else imgHTML = `<div class="w-full h-full bg-slate-100 flex items-center justify-center text-xs text-slate-400">Sin Imagen</div>`;
+
+            // Templates simples para renderizar
+            if(slide.layout === 'background') {
+                canvas.innerHTML = `<div class="absolute inset-0 z-0">${imgHTML}</div><div class="absolute inset-0 bg-black/60 z-0"></div><div class="relative z-10 h-full flex flex-col justify-center text-center p-8 text-white"><h1 class="text-3xl font-bold mb-4 drop-shadow-lg">${slide.title}</h1><p class="text-lg opacity-90 drop-shadow-md whitespace-pre-line">${slide.content}</p></div>`;
+            } else if(slide.layout === 'split_left') {
+                canvas.innerHTML = `<div class="grid grid-cols-2 h-full"><div class="relative border-r border-slate-100">${imgHTML}</div><div class="p-8 overflow-y-auto"><h2 class="text-2xl font-bold mb-4 border-b-2 pb-2 border-orange-100">${slide.title}</h2><div class="text-sm whitespace-pre-line opacity-80">${slide.content}</div></div></div>`;
+            } else if(slide.layout === 'classic') {
+                canvas.innerHTML = `<div class="p-12 h-full flex flex-col"><h2 class="text-3xl font-bold mb-6 border-b-2 pb-4 border-orange-100 text-center">${slide.title}</h2><div class="text-base whitespace-pre-line opacity-80 flex-1">${slide.content}</div></div>`;
+            } else { // split_right
+                canvas.innerHTML = `<div class="grid grid-cols-2 h-full"><div class="p-8 overflow-y-auto"><h2 class="text-2xl font-bold mb-4 border-b-2 pb-2 border-orange-100">${slide.title}</h2><div class="text-sm whitespace-pre-line opacity-80">${slide.content}</div></div><div class="relative border-l border-slate-100">${imgHTML}</div></div>`;
             }
 
-            // --- LAYOUTS ---
-            if (slide.layout === 'background') {
-                canvas.innerHTML = `
-                    ${slide.imageData ? `<div class="absolute inset-0 z-0 animate-in fade-in duration-700">${imageHTML}</div><div class="absolute inset-0 bg-black/60 z-0"></div>` : ''}
-                    <div class="relative z-10 h-full flex flex-col justify-center text-center p-8 ${slide.imageData ? 'text-white' : ''}">
-                        <h1 class="text-4xl sm:text-5xl font-bold mb-6 leading-tight drop-shadow-xl">${slide.title}</h1>
-                        <div class="w-24 h-2 rounded-full mx-auto mb-6 bg-orange-500 shadow-lg"></div>
-                        <p class="text-xl opacity-90 font-light drop-shadow-md whitespace-pre-line">${slide.content}</p>
-                    </div>
-                `;
-            } else if (slide.layout === 'split_left') {
-                 canvas.innerHTML = `
-                    <div class="w-full h-full grid grid-cols-2">
-                        <div class="h-full border-r border-black/5 bg-slate-100 relative overflow-hidden flex items-center justify-center">
-                             ${imageHTML}
-                        </div>
-                        <div class="p-8 sm:p-10 flex flex-col overflow-y-auto">
-                            <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2" style="border-color:${slide.lineColor || slide.text}40">${slide.title}</h2>
-                            <div class="text-lg leading-relaxed whitespace-pre-line opacity-90 flex-1">${slide.content}</div>
-                            <div class="mt-4 text-xs opacity-40">${activeIndex + 1} / ${slides.length}</div>
-                        </div>
-                    </div>
-                `;
-            } else if (slide.layout === 'classic') {
-                canvas.innerHTML = `
-                    <div class="h-full flex flex-col p-12 sm:p-16">
-                         <h2 class="text-4xl font-bold mb-6 pb-4 border-b-2" style="border-color:${slide.lineColor || slide.text}40">${slide.title}</h2>
-                         <div class="text-xl leading-relaxed whitespace-pre-line opacity-90 flex-1">${slide.content}</div>
-                         <div class="mt-4 text-xs opacity-40 text-right">${activeIndex + 1} / ${slides.length}</div>
-                    </div>
-                `;
-            } else {
-                canvas.innerHTML = `
-                    <div class="w-full h-full grid grid-cols-2">
-                        <div class="p-8 sm:p-10 flex flex-col overflow-y-auto">
-                            <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2" style="border-color:${slide.lineColor || slide.text}40">${slide.title}</h2>
-                            <div class="text-lg leading-relaxed whitespace-pre-line opacity-90 flex-1">${slide.content}</div>
-                            <div class="mt-4 text-xs opacity-40">${activeIndex + 1} / ${slides.length}</div>
-                        </div>
-                        <div class="h-full border-l border-black/5 bg-slate-100 relative overflow-hidden flex items-center justify-center">
-                             ${imageHTML}
-                        </div>
-                    </div>
-                `;
-            }
-
+            // Tira de miniaturas
             strip.innerHTML = slides.map((s, i) => `
-                <div onclick="goToSlide(${i})" 
-                     class="shrink-0 h-16 w-28 rounded border-2 cursor-pointer relative overflow-hidden transition-all ${i === activeIndex ? 'active-thumb' : 'border-slate-200 opacity-60'}"
-                     style="background-color:${s.bg}">
-                     ${s.imageData && s.layout !== 'classic' ? `<img src="${s.imageData}" class="absolute inset-0 w-full h-full object-cover opacity-50" />` : ''}
-                     <div class="absolute inset-0 flex items-center justify-center font-bold text-xs z-10" style="color:${s.text}">${i+1}</div>
-                     ${s.imgLoading ? '<div class="absolute bottom-0 left-0 right-0 h-1 bg-orange-500 animate-pulse"></div>' : ''}
+                <div onclick="activeIndex=${i};render()" class="shrink-0 w-24 h-14 rounded border-2 cursor-pointer relative overflow-hidden transition-all ${i === activeIndex ? 'border-orange-500 shadow-md scale-105' : 'border-slate-200 opacity-60 hover:opacity-100'}" style="background-color:${s.bg}">
+                    ${s.imageData ? `<img src="${s.imageData}" class="absolute inset-0 w-full h-full object-cover opacity-50">` : ''}
+                    <div class="absolute inset-0 flex items-center justify-center font-bold text-xs z-10 text-slate-800">${i+1}</div>
                 </div>
             `).join('');
             
             lucide.createIcons();
         }
 
-        function goToSlide(i) { activeIndex = i; render(); }
-        
-        function showLoader(show, text) {
-            const overlay = document.getElementById('loaderOverlay');
-            if (show) {
-                overlay.classList.remove('hidden');
-                overlay.classList.add('flex');
-            } else {
-                overlay.classList.add('hidden');
-                overlay.classList.remove('flex');
-            }
-            if(text) document.getElementById('loaderTitle').innerText = text;
-        }
-
-        // --- EXPORTAR ---
+        // --- DOWNLOAD ---
         function downloadPPT() {
-            if (typeof PptxGenJS === 'undefined') return showToast("Cargando motor...", 'error');
-            try {
-                const pres = new PptxGenJS();
-                pres.layout = 'LAYOUT_16x9';
-                pres.title = pptTitle;
-
-                slides.forEach(s => {
-                    const slide = pres.addSlide();
-                    slide.background = { color: s.bg };
-                    const hasImg = s.imageData && s.layout !== 'classic';
-
-                    if (s.layout === 'background' && hasImg) {
-                        slide.addImage({ data: s.imageData, x:0, y:0, w:'100%', h:'100%' });
-                        slide.addShape(pres.ShapeType.rect, { x:0, y:0, w:'100%', h:'100%', fill:{color:'000000', transparency:60} });
-                        slide.addText(s.title, { x:0.5, y:'40%', w:'90%', fontSize:44, bold:true, align:'center', color:'FFFFFF' });
-                        slide.addText(s.content, { x:1, y:'60%', w:'80%', fontSize:24, align:'center', color:'FFFFFF' });
-                    } else if (s.layout === 'split_left' && hasImg) {
-                        slide.addImage({ data: s.imageData, x:0, y:0, w:'50%', h:'100%' });
-                        slide.addText(s.title, { x:'55%', y:0.5, w:'40%', fontSize:32, bold:true, color:s.text });
-                        slide.addText(s.content, { x:'55%', y:1.5, w:'40%', h:4.5, fontSize:18, color:s.text, align:'left', valign:'top', bullet: true });
-                    } else if (s.layout === 'classic') {
-                        slide.addText(s.title, { x:0.5, y:0.5, w:'90%', fontSize:36, bold:true, color:s.text });
-                        slide.addText(s.content, { x:0.5, y:1.5, w:'90%', h:4.5, fontSize:20, color:s.text, align:'left', valign:'top', bullet: true });
-                    } else {
-                        slide.addText(s.title, { x:0.5, y:0.5, w:'45%', fontSize:32, bold:true, color:s.text });
-                        slide.addText(s.content, { x:0.5, y:1.5, w:'45%', h:4.5, fontSize:18, color:s.text, align:'left', valign:'top', bullet: true });
-                        if(hasImg) slide.addImage({ data: s.imageData, x:'50%', y:0, w:'50%', h:'100%' });
-                    }
-                });
-                pres.writeFile({ fileName: `${pptTitle}.pptx` });
-                showToast("Descarga iniciada");
-            } catch (e) { showToast("Error: " + e.message, 'error'); }
-        }
-
-        // Helpers
-        function getRandomProfessionalTheme() { return { bg: '#ffffff', text: '#1e293b', accent: '#f97316' }; }
-        function openSettings() { document.getElementById('settingsModal').classList.remove('hidden'); }
-        function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
-        function saveSettings() {
-            const token = document.getElementById('hfTokenInput').value.trim();
-            if(token) { localStorage.setItem('ppt_hf_token', token); HF_TOKEN = token; showToast("Token Guardado"); }
-            updateStatus(); closeSettings();
+            if(slides.length === 0) return showToast("Genera una presentación primero", 'error');
+            const pres = new PptxGenJS();
+            pres.layout = 'LAYOUT_16x9'; pres.title = pptTitle;
+            slides.forEach(s => {
+                const slide = pres.addSlide();
+                slide.background = { color: s.bg };
+                const hasImg = s.imageData && s.layout !== 'classic';
+                
+                if(s.layout === 'background' && hasImg) {
+                    slide.addImage({ data: s.imageData, x:0, y:0, w:'100%', h:'100%' });
+                    slide.addShape(pres.ShapeType.rect, { x:0, y:0, w:'100%', h:'100%', fill:{color:'000000', transparency:50} });
+                    slide.addText(s.title, { x:0.5, y:'40%', w:'90%', fontSize:36, bold:true, align:'center', color:'FFFFFF' });
+                    slide.addText(s.content, { x:1, y:'60%', w:'80%', fontSize:18, align:'center', color:'FFFFFF' });
+                } else if(s.layout === 'split_left' && hasImg) {
+                    slide.addImage({ data: s.imageData, x:0, y:0, w:'50%', h:'100%' });
+                    slide.addText(s.title, { x:'55%', y:0.5, w:'40%', fontSize:24, bold:true, color:s.text });
+                    slide.addText(s.content, { x:'55%', y:1.5, w:'40%', h:4.5, fontSize:14, color:s.text, valign:'top' });
+                } else if(s.layout === 'classic') {
+                    slide.addText(s.title, { x:0.5, y:0.5, w:'90%', fontSize:32, bold:true, align:'center', color:s.text });
+                    slide.addText(s.content, { x:0.5, y:1.5, w:'90%', h:4.5, fontSize:16, color:s.text, valign:'top' });
+                } else { // split_right
+                    slide.addText(s.title, { x:0.5, y:0.5, w:'45%', fontSize:24, bold:true, color:s.text });
+                    slide.addText(s.content, { x:0.5, y:1.5, w:'45%', h:4.5, fontSize:14, color:s.text, valign:'top' });
+                    if(hasImg) slide.addImage({ data: s.imageData, x:'50%', y:0, w:'50%', h:'100%' });
+                }
+            });
+            pres.writeFile({ fileName: `${pptTitle}.pptx` });
         }
     </script>
 </body>
