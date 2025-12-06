@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="es">
+<!-- La clase 'light' es temporal. El JS detectará si el modo oscuro está guardado o lo activará por defecto. -->
+<html lang="es" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,50 +10,88 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f97316'/%3E%3Cstop offset='100%25' stop-color='%23db2777'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='120' fill='url(%23g)'/%3E%3Crect x='100' y='140' width='312' height='200' rx='20' fill='white'/%3E%3Cpath d='M256 340v80m-60 0h120' stroke='white' stroke-width='40' stroke-linecap='round' opacity='0.9'/%3E%3C/svg%3E" type="image/svg+xml">
     
     <title>genpptx - Generador de PPT con IA</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1999008844241347"
-     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1999008844241347" crossorigin="anonymous"></script>
     <!-- LIBRERÍAS -->
     <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        /* Base */
-        body { -webkit-tap-highlight-color: transparent; min-height: 100vh; scroll-behavior: smooth; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        /* --- Definición de Colores para Modo Claro y Oscuro --- */
+        :root.light {
+            --bg-page: #f8fafc; /* slate-50 */
+            --bg-header: #ffffff; /* white */
+            --bg-card: #ffffff; /* white */
+            --text-primary: #1e293b; /* slate-800 */
+            --text-secondary: #64748b; /* slate-500 */
+            --border-color: #e2e8f0; /* slate-200 */
+            --bg-input: #f8fafc; /* slate-50 */
+        }
+        :root.dark {
+            --bg-page: #0f172a; /* slate-900 */
+            --bg-header: #1e293b; /* slate-800 */
+            --bg-card: #1e293b; /* slate-800 */
+            --text-primary: #f1f5f9; /* slate-100 */
+            --text-secondary: #94a3b8; /* slate-400 */
+            --border-color: #334155; /* slate-700 */
+            --bg-input: #334155; /* slate-700 */
+        }
+
+        body { 
+            -webkit-tap-highlight-color: transparent; 
+            min-height: 100vh; 
+            scroll-behavior: smooth; 
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Aplicación de Variables a Clases de Tailwind (para adaptabilidad de tema) */
+        .bg-page { background-color: var(--bg-page); }
+        .bg-header { background-color: var(--bg-header); }
+        .bg-card { background-color: var(--bg-card); }
+        .text-primary { color: var(--text-primary); }
+        .text-secondary { color: var(--text-secondary); }
+        .border-base { border-color: var(--border-color); }
+        .bg-input { background-color: var(--bg-input); }
         
-        /* Animaciones */
-        .active-thumb { border-color: #f97316; box-shadow: 0 0 0 2px #ffedd5; transform: scale(1.05); }
-        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
-        @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        /* Ajustes de color forzados para que Tailwind use las variables CSS */
+        .text-slate-900, .text-slate-800, .text-slate-700 { color: var(--text-primary); }
+        .text-slate-500, .text-slate-600, .text-slate-400 { color: var(--text-secondary); }
+        .border-slate-200, .border-slate-100 { border-color: var(--border-color); }
+        .bg-slate-50, .bg-slate-100 { background-color: var(--bg-input); }
         
+        /* Estilos específicos */
         .img-loader {
-            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background: linear-gradient(90deg, var(--bg-card) 25%, var(--border-color) 50%, var(--bg-card) 75%);
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
         }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .progress-bar-container { background: var(--border-color); }
+        
+        /* Scrollbar y animaciones */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-page); }
+        ::-webkit-scrollbar-thumb { background: var(--text-secondary); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Barra de Progreso */
-        .progress-bar-container { width: 240px; height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; margin-top: 16px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
-        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #f97316, #ea580c); width: 0%; transition: width 0.4s ease-out; border-radius: 99px; }
+        .active-thumb { border-color: #f97316; box-shadow: 0 0 0 2px #ffedd5; transform: scale(1.05); }
+        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
-<body class="bg-slate-50 flex flex-col font-sans text-slate-800">
+<body class="bg-page flex flex-col font-sans text-primary">
 
     <!-- HEADER / NAVBAR -->
-    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-sm shrink-0">
+    <header class="h-16 bg-header border-b border-border-color flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-sm shrink-0">
         <div class="flex items-center gap-2 cursor-pointer" onclick="window.scrollTo(0,0)">
             <div class="bg-gradient-to-br from-orange-500 to-pink-500 text-white p-2 rounded-lg shadow-sm">
                 <i data-lucide="layout-template" class="w-5 h-5"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg leading-tight tracking-tight">genpptx</h1>
+                <h1 class="font-bold text-lg leading-tight tracking-tight text-primary">genpptx</h1>
                 <!-- INDICADOR DE ESTADO REINTEGRADO -->
-                <p class="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                <p class="text-[10px] text-secondary font-medium flex items-center gap-1">
                     <span id="hfStatus" class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
                     IA Ready
                 </p>
@@ -60,18 +99,26 @@
         </div>
         
         <!-- Navegación Desktop -->
-        <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
-            <a href="#como-funciona" class="hover:text-orange-600 transition-colors">Cómo funciona</a>
-            <a href="#caracteristicas" class="hover:text-orange-600 transition-colors">Características</a>
-            <button onclick="openModal('contact')" class="hover:text-orange-600 transition-colors">Contacto</button>
-            <button onclick="openSettings()" class="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full transition-colors text-slate-700">
+        <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-secondary">
+            <a href="#como-funciona" class="hover:text-orange-500 transition-colors">Cómo funciona</a>
+            <a href="#caracteristicas" class="hover:text-orange-500 transition-colors">Características</a>
+            <button onclick="openModal('contact')" class="hover:text-orange-500 transition-colors">Contacto</button>
+            <!-- Botón de Modo Oscuro -->
+            <button id="themeToggleDesktop" onclick="toggleTheme()" class="hover:text-orange-500 transition-colors text-primary">
+                 <i data-lucide="sun" class="w-5 h-5"></i>
+            </button>
+            <button onclick="openSettings()" class="flex items-center gap-1 bg-input hover:bg-border-color px-3 py-1.5 rounded-full transition-colors text-primary border border-border-color">
                 <i data-lucide="settings" class="w-4 h-4"></i> Config
             </button>
         </nav>
 
         <!-- Botón Móvil -->
         <div class="md:hidden flex items-center gap-3">
-             <button onclick="openSettings()" class="text-slate-600"><i data-lucide="settings" class="w-5 h-5"></i></button>
+             <!-- Botón de Modo Oscuro Móvil -->
+            <button id="themeToggleMobile" onclick="toggleTheme()" class="text-secondary hover:text-orange-500 transition-colors">
+                <i data-lucide="sun" class="w-6 h-6"></i>
+            </button>
+             <button onclick="openSettings()" class="text-secondary hover:text-orange-500"><i data-lucide="settings" class="w-6 h-6"></i></button>
         </div>
     </header>
 
@@ -80,14 +127,14 @@
         
         <!-- Hero Section de la App -->
         <div class="text-center py-6 md:py-10 space-y-2">
-            <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Crea presentaciones en segundos</h2>
-            <p class="text-slate-500 max-w-lg mx-auto">La Inteligencia Artificial diseña, escribe y genera imágenes para tus diapositivas automáticamente.</p>
+            <h2 class="text-3xl md:text-4xl font-extrabold text-primary tracking-tight">Crea presentaciones en segundos</h2>
+            <p class="text-secondary max-w-lg mx-auto">La Inteligencia Artificial diseña, escribe y genera imágenes para tus diapositivas automáticamente.</p>
         </div>
 
         <!-- Panel de Input -->
-        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-1 sticky top-20 z-20 mx-auto w-full max-w-2xl ring-1 ring-slate-900/5">
+        <div class="bg-card rounded-xl shadow-lg border border-border-color p-1 sticky top-20 z-20 mx-auto w-full max-w-2xl ring-1 ring-primary/10">
             <div class="flex flex-col sm:flex-row gap-1 p-1">
-                <input type="text" id="topicInput" placeholder="¿Sobre qué quieres tu presentación? Ej: Marketing Digital..." class="flex-1 bg-transparent border-0 rounded-lg px-4 py-3 text-base outline-none focus:ring-0 placeholder:text-slate-400">
+                <input type="text" id="topicInput" placeholder="¿Sobre qué quieres tu presentación? Ej: Marketing Digital..." class="flex-1 bg-transparent border-0 rounded-lg px-4 py-3 text-base outline-none focus:ring-0 placeholder:text-secondary text-primary">
                 <button onclick="generateDeck()" class="bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-500 hover:to-pink-500 text-white px-8 py-3 rounded-lg font-bold text-sm shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 sm:w-auto w-full">
                     <i data-lucide="sparkles" class="w-4 h-4"></i> <span class="hidden sm:inline">Generar PPT</span><span class="sm:hidden">Generar</span>
                 </button>
@@ -97,9 +144,9 @@
         <!-- Canvas (Vista Previa) -->
         <div class="w-full flex flex-col items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div class="w-full relative group shadow-2xl rounded-lg">
-                <div id="canvas" class="aspect-video w-full bg-white rounded-lg flex overflow-hidden ring-1 ring-slate-900/10 transition-all relative">
+                <div id="canvas" class="aspect-video w-full bg-card rounded-lg flex overflow-hidden ring-1 ring-primary/10 transition-all relative">
                     <!-- Contenido Slide -->
-                    <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-50">
+                    <div class="w-full h-full flex flex-col items-center justify-center text-secondary bg-input">
                         <i data-lucide="presentation" class="w-16 h-16 mb-4 opacity-20"></i>
                         <p class="text-sm font-medium opacity-60">Tu presentación aparecerá aquí</p>
                     </div>
@@ -110,16 +157,16 @@
                     <button onclick="regenerateImage()" class="bg-black/70 backdrop-blur text-white px-3 py-2 rounded-full text-xs font-bold hover:bg-black/90 transition-all flex items-center gap-2">
                         <i data-lucide="refresh-cw" class="w-3 h-3"></i> <span class="hidden sm:inline">Nueva Imagen</span>
                     </button>
-                    <button onclick="downloadPPT()" class="bg-white text-slate-900 px-4 py-2 rounded-full text-xs font-bold shadow-lg hover:bg-slate-50 transition-all flex items-center gap-2">
+                    <button onclick="downloadPPT()" class="bg-card text-primary px-4 py-2 rounded-full text-xs font-bold shadow-lg hover:bg-border-color transition-all flex items-center gap-2">
                         <i data-lucide="download" class="w-3 h-3"></i> Descargar .pptx
                     </button>
                 </div>
             </div>
             
             <!-- Barra de Edición IA -->
-            <div class="w-full max-w-3xl bg-white p-2 rounded-full shadow-sm border border-slate-200 flex gap-2 items-center ring-1 ring-slate-100">
+            <div class="w-full max-w-3xl bg-card p-2 rounded-full shadow-sm border border-border-color flex gap-2 items-center ring-1 ring-border-color">
                 <div class="bg-indigo-50 p-2 rounded-full text-indigo-600 shrink-0 ml-1"><i data-lucide="bot" class="w-4 h-4"></i></div>
-                <input type="text" id="editInput" placeholder="Pide cambios a la IA: 'Cambia el fondo a azul', 'Resume el texto'..." class="flex-1 bg-transparent text-sm px-2 outline-none text-slate-700 placeholder:text-slate-400" onkeydown="if(event.key === 'Enter') requestEdit()">
+                <input type="text" id="editInput" placeholder="Pide cambios a la IA: 'Cambia el fondo a azul', 'Resume el texto'..." class="flex-1 bg-transparent text-sm px-2 outline-none placeholder:text-secondary text-primary" onkeydown="if(event.key === 'Enter') requestEdit()">
                 <button onclick="requestEdit()" class="bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-slate-800 transition-colors">
                     Editar
                 </button>
@@ -127,10 +174,10 @@
         </div>
 
         <!-- Tira de Miniaturas -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 overflow-hidden mb-8">
-            <h3 class="text-xs font-bold text-slate-500 mb-3 flex justify-between items-center px-1">
+        <div class="bg-card rounded-xl shadow-sm border border-border-color p-4 overflow-hidden mb-8">
+            <h3 class="text-xs font-bold text-secondary mb-3 flex justify-between items-center px-1">
                 <span>Diapositivas</span>
-                <span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-400">Vista Previa</span>
+                <span class="text-[10px] bg-input px-2 py-1 rounded text-secondary">Vista Previa</span>
             </h3>
             <div id="slidesStrip" class="flex gap-3 overflow-x-auto pb-2 min-h-[80px] scrollbar-hide">
                 <!-- Miniaturas se generan aquí -->
@@ -138,19 +185,19 @@
         </div>
         
         <!-- SECCIÓN SEO: CONTENIDO PARA ADSENSE -->
-        <article class="max-w-4xl mx-auto prose prose-slate prose-sm md:prose-base mt-12 mb-20 px-4">
-            <hr class="border-slate-200 mb-12">
+        <article class="max-w-4xl mx-auto prose prose-sm md:prose-base mt-12 mb-20 px-4" style="color: var(--text-primary);">
+            <hr class="border-border-color mb-12">
             
-            <h2 id="como-funciona" class="text-2xl font-bold text-slate-800 mb-4">¿Cómo funciona genpptx?</h2>
-            <p>
+            <h2 id="como-funciona" class="text-2xl font-bold text-primary mb-4">¿Cómo funciona genpptx?</h2>
+            <p style="color: var(--text-secondary);">
                 <strong>genpptx</strong> es una herramienta avanzada que combina la potencia de modelos de lenguaje grandes (como Gemini) con generadores de imágenes de última generación (SDXL) para automatizar la creación de presentaciones profesionales.
             </p>
-            <p>
+            <p style="color: var(--text-secondary);">
                 A diferencia de las plantillas tradicionales, nuestra IA analiza tu tema y estructura una narrativa completa: desde la introducción hasta las conclusiones. No solo escribe el texto, sino que actúa como un <em>Director de Arte</em> digital, decidiendo qué diseño visual (layout) se adapta mejor a cada diapositiva y generando imágenes únicas y libres de derechos para ilustrar tus ideas.
             </p>
 
-            <h3 id="caracteristicas" class="text-xl font-bold text-slate-800 mt-8 mb-3">Características Principales</h3>
-            <ul class="list-disc pl-5 space-y-2 text-slate-600">
+            <h3 id="caracteristicas" class="text-xl font-bold text-primary mt-8 mb-3">Características Principales</h3>
+            <ul class="list-disc pl-5 space-y-2" style="color: var(--text-secondary);">
                 <li><strong>Generación Instantánea:</strong> Obtén una presentación de 6-10 diapositivas en menos de un minuto.</li>
                 <li><strong>Imágenes con IA (SDXL):</strong> Cada diapositiva incluye imágenes generadas artificialmente y adaptadas al contexto del texto.</li>
                 <li><strong>Edición Conversacional:</strong> ¿No te gusta algo? Simplemente chatea con la IA ("Pon la imagen a la izquierda", "Haz el texto más corto") y verás los cambios al instante.</li>
@@ -158,21 +205,21 @@
                 <li><strong>Privacidad Primero:</strong> No almacenamos tus datos. Todo el proceso ocurre en tu navegador y mediante conexiones seguras a las APIs.</li>
             </ul>
 
-            <h3 class="text-xl font-bold text-slate-800 mt-8 mb-3">Preguntas Frecuentes</h3>
+            <h3 class="text-xl font-bold text-primary mt-8 mb-3">Preguntas Frecuentes</h3>
             <div class="space-y-4">
-                <details class="group bg-slate-50 p-4 rounded-lg cursor-pointer">
-                    <summary class="font-bold text-slate-700 list-none flex justify-between items-center">
+                <details class="group bg-input p-4 rounded-lg cursor-pointer">
+                    <summary class="font-bold text-primary list-none flex justify-between items-center">
                         ¿Es gratuito usar genpptx?
-                        <span class="transition group-open:rotate-180"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>
+                        <span class="transition group-open:rotate-180 text-secondary"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>
                     </summary>
-                    <p class="text-slate-600 mt-2 text-sm">Sí, la herramienta básica es de uso gratuito. Utilizamos tokens de APIs públicas para democratizar el acceso a la creación de contenido con IA.</p>
+                    <p class="text-secondary mt-2 text-sm">Sí, la herramienta básica es de uso gratuito. Utilizamos tokens de APIs públicas para democratizar el acceso a la creación de contenido con IA.</p>
                 </details>
-                <details class="group bg-slate-50 p-4 rounded-lg cursor-pointer">
-                    <summary class="font-bold text-slate-700 list-none flex justify-between items-center">
+                <details class="group bg-input p-4 rounded-lg cursor-pointer">
+                    <summary class="font-bold text-primary list-none flex justify-between items-center">
                         ¿Las imágenes tienen derechos de autor?
-                        <span class="transition group-open:rotate-180"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>
+                        <span class="transition group-open:rotate-180 text-secondary"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>
                     </summary>
-                    <p class="text-slate-600 mt-2 text-sm">Las imágenes generadas por IA (Stable Diffusion XL) son generalmente libres de derechos de autor y pueden usarse para fines personales o comerciales, aunque te recomendamos revisar las leyes locales sobre arte generativo.</p>
+                    <p class="text-secondary mt-2 text-sm">Las imágenes generadas por IA (Stable Diffusion XL) son generalmente libres de derechos de autor y pueden usarse para fines personales o comerciales, aunque te recomendamos revisar las leyes locales sobre arte generativo.</p>
                 </details>
             </div>
         </article>
@@ -180,34 +227,34 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-white border-t border-slate-200 py-10">
+    <footer class="bg-header border-t border-border-color py-10">
         <div class="max-w-5xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
             <div>
                 <div class="flex items-center gap-2 mb-4">
                     <div class="bg-slate-900 text-white p-1.5 rounded">
                         <i data-lucide="layout-template" class="w-4 h-4"></i>
                     </div>
-                    <span class="font-bold text-slate-800">genpptx</span>
+                    <span class="font-bold text-primary">genpptx</span>
                 </div>
-                <p class="text-slate-500 mb-4">Transformando ideas en presentaciones visuales con el poder de la Inteligencia Artificial.</p>
-                <p class="text-slate-400 text-xs">© 2024 genpptx. Todos los derechos reservados.</p>
+                <p class="text-secondary mb-4">Transformando ideas en presentaciones visuales con el poder de la Inteligencia Artificial.</p>
+                <p class="text-secondary text-xs">© 2024 genpptx. Todos los derechos reservados.</p>
             </div>
             
             <div>
-                <h4 class="font-bold text-slate-800 mb-4">Producto</h4>
-                <ul class="space-y-2 text-slate-500">
-                    <li><a href="#" class="hover:text-orange-600">Generador PPT</a></li>
-                    <li><a href="#" class="hover:text-orange-600">Editor IA</a></li>
-                    <li><a href="#" class="hover:text-orange-600">Galería de Prompts</a></li>
+                <h4 class="font-bold text-primary mb-4">Producto</h4>
+                <ul class="space-y-2 text-secondary">
+                    <li><a href="#" class="hover:text-orange-500">Generador PPT</a></li>
+                    <li><a href="#" class="hover:text-orange-500">Editor IA</a></li>
+                    <li><a href="#" class="hover:text-orange-500">Galería de Prompts</a></li>
                 </ul>
             </div>
 
             <div>
-                <h4 class="font-bold text-slate-800 mb-4">Legal</h4>
-                <ul class="space-y-2 text-slate-500">
-                    <li><button onclick="openModal('privacy')" class="hover:text-orange-600">Política de Privacidad</button></li>
-                    <li><button onclick="openModal('terms')" class="hover:text-orange-600">Términos de Uso</button></li>
-                    <li><button onclick="openModal('contact')" class="hover:text-orange-600">Contacto</button></li>
+                <h4 class="font-bold text-primary mb-4">Legal</h4>
+                <ul class="space-y-2 text-secondary">
+                    <li><button onclick="openModal('privacy')" class="hover:text-orange-500">Política de Privacidad</button></li>
+                    <li><button onclick="openModal('terms')" class="hover:text-orange-500">Términos de Uso</button></li>
+                    <li><button onclick="openModal('contact')" class="hover:text-orange-500">Contacto</button></li>
                 </ul>
             </div>
         </div>
@@ -217,44 +264,95 @@
     
     <!-- Modal Configuración -->
     <div id="settingsModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
-            <button onclick="closeModal('settingsModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-            <h3 class="font-bold text-lg mb-1 text-slate-800">Configuración IA</h3>
-            <p class="text-xs text-slate-500 mb-4">Token configurado automáticamente.</p>
-            <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Hugging Face Token</label>
-            <input type="password" id="hfTokenInput" value="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" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm mb-2 outline-none focus:border-orange-500 text-slate-600">
+        <div class="bg-card rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
+            <button onclick="closeModal('settingsModal')" class="absolute top-4 right-4 text-secondary hover:text-primary"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <h3 class="font-bold text-lg mb-1 text-primary">Configuración IA</h3>
+            <p class="text-xs text-secondary mb-4">El servidor usa su propia clave (seguro). Puedes ingresar un token personal aquí si la cuota del servidor se agota.</p>
+            
+            <!-- Selector de Tema dentro del modal de configuración -->
+            <div class="flex justify-between items-center p-3 bg-input rounded-lg border border-border-color mb-4">
+                <span class="text-sm font-medium text-primary">Modo Oscuro</span>
+                <button onclick="toggleTheme()" class="text-orange-500 p-1 rounded-full bg-page hover:bg-border-color transition-colors">
+                    <i id="themeIconSetting" data-lucide="moon" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <label class="text-[10px] font-bold text-secondary uppercase block mb-1">Hugging Face Token Personal</label>
+            <input type="password" id="hfTokenInput" value="" class="w-full bg-input border border-border-color rounded-lg p-3 text-sm mb-2 outline-none focus:border-orange-500 text-primary placeholder:text-secondary">
             <button onclick="saveSettings()" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-lg font-bold shadow-lg mt-2 transition-colors">Guardar</button>
         </div>
     </div>
 
     <!-- Modal Genérico para Texto Legal -->
     <div id="legalModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-        <div class="bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl relative max-h-[80vh] overflow-y-auto">
-            <button onclick="closeModal('legalModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
-            <div id="legalContent" class="prose prose-sm prose-slate">
+        <div class="bg-card rounded-2xl w-full max-w-2xl p-8 shadow-2xl relative max-h-[80vh] overflow-y-auto">
+            <button onclick="closeModal('legalModal')" class="absolute top-4 right-4 text-secondary hover:text-primary bg-input rounded-full p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div id="legalContent" class="prose prose-sm prose-slate" style="color: var(--text-primary);">
                 <!-- Contenido dinámico aquí -->
             </div>
         </div>
     </div>
 
     <!-- OVERLAY DE CARGA -->
-    <div id="loaderOverlay" class="fixed inset-0 bg-white/95 z-50 hidden flex-col items-center justify-center backdrop-blur-sm transition-opacity duration-500">
-        <div class="w-16 h-16 border-4 border-slate-200 border-t-orange-500 rounded-full animate-spin mb-6"></div>
-        <h3 class="text-xl font-bold text-slate-800" id="loaderTitle">Iniciando...</h3>
-        <p class="text-sm text-slate-500 mt-2 font-medium" id="loaderText">Conectando...</p>
+    <div id="loaderOverlay" class="fixed inset-0 bg-page/95 z-50 hidden flex-col items-center justify-center backdrop-blur-sm transition-opacity duration-500">
+        <div class="w-16 h-16 border-4 border-border-color border-t-orange-500 rounded-full animate-spin mb-6"></div>
+        <h3 class="text-xl font-bold text-primary" id="loaderTitle">Iniciando...</h3>
+        <p class="text-sm text-secondary mt-2 font-medium" id="loaderText">Conectando...</p>
         <div class="progress-bar-container">
             <div id="progressBarFill" class="progress-bar-fill"></div>
         </div>
-        <p class="text-[10px] text-slate-400 mt-2" id="progressPercent">0%</p>
+        <p class="text-[10px] text-secondary mt-2" id="progressPercent">0%</p>
     </div>
 
     <!-- TOAST -->
     <div id="toastContainer" class="fixed bottom-4 left-4 right-4 z-50 pointer-events-none flex flex-col gap-2 items-center"></div>
 
     <script>
-        // --- CONFIGURACIÓN ---
-        const GEMINI_KEY = "AIzaSyAVRnT3dL2Ka5lZHGGNVD81L4vyRi4UEBg"; 
-        const PRECONFIGURED_HF_TOKEN = "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";
+        // --- CONFIGURACIÓN DE TEMA ---
+        function loadTheme() {
+            const html = document.documentElement;
+            // 1. Obtener la preferencia guardada, si no existe, usar 'dark' como predeterminado
+            const storedTheme = localStorage.getItem('theme') || 'dark'; 
+            
+            html.classList.remove('light', 'dark');
+            html.classList.add(storedTheme);
+            updateThemeIcons(storedTheme);
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.classList.remove(currentTheme);
+            html.classList.add(newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcons(newTheme);
+            
+            // Re-renderizar el canvas para que los colores internos se adapten si es necesario
+            render();
+        }
+
+        function updateThemeIcons(theme) {
+            const isDark = theme === 'dark';
+            const iconName = isDark ? 'sun' : 'moon';
+            
+            const desktopButton = document.getElementById('themeToggleDesktop');
+            const mobileButton = document.getElementById('themeToggleMobile');
+            const settingIcon = document.getElementById('themeIconSetting');
+
+            // Actualizar iconos de la cabecera
+            if (desktopButton) desktopButton.innerHTML = `<i data-lucide="${iconName}" class="w-5 h-5"></i>`;
+            if (mobileButton) mobileButton.innerHTML = `<i data-lucide="${iconName}" class="w-6 h-6"></i>`;
+            
+            // Actualizar icono en el modal de configuración
+            if (settingIcon) settingIcon.setAttribute('data-lucide', iconName);
+            
+            lucide.createIcons();
+        }
+        
+        // --- CONFIGURACIÓN API ---
+        const PRECONFIGURED_HF_TOKEN = ""; 
         let HF_TOKEN = localStorage.getItem('ppt_hf_token') || PRECONFIGURED_HF_TOKEN;
 
         // --- ESTADO ---
@@ -288,11 +386,12 @@
                 <p>¿Tienes alguna duda o sugerencia? Nos encantaría escucharte.</p>
                 <p>Puedes escribirnos directamente a:</p>
                 <p class="font-bold text-lg text-indigo-600">soporte@genpptx.com</p>
-                <p class="text-sm text-slate-500 mt-4">(Nota: Este es un correo de demostración para el sitio).</p>
+                <p class="text-sm text-secondary mt-4">(Nota: Este es un correo de demostración para el sitio).</p>
             `
         };
 
         window.onload = () => {
+            loadTheme(); // Cargar y aplicar el tema guardado (o 'dark' por defecto)
             lucide.createIcons();
             updateStatus();
             document.getElementById('hfTokenInput').value = HF_TOKEN;
@@ -301,7 +400,6 @@
         // --- INTERFAZ & MODALES ---
         function updateStatus() {
             const el = document.getElementById('hfStatus');
-            // Protección contra null: si el elemento no existe, salimos sin error
             if (!el) return;
 
             if(HF_TOKEN) {
@@ -314,7 +412,7 @@
         }
 
         function openModal(type) {
-            if(type === 'settingsModal') { // Fix para el botón de config viejo
+            if(type === 'settingsModal') {
                 document.getElementById('settingsModal').classList.remove('hidden');
                 document.getElementById('settingsModal').classList.add('flex');
                 return;
@@ -341,7 +439,8 @@
 
         function saveSettings() {
             const token = document.getElementById('hfTokenInput').value.trim();
-            if(token) { localStorage.setItem('ppt_hf_token', token); HF_TOKEN = token; showToast("Token Guardado"); }
+            if(token) { localStorage.setItem('ppt_hf_token', token); HF_TOKEN = token; showToast("Token Personal Guardado"); }
+            else { localStorage.removeItem('ppt_hf_token'); HF_TOKEN = ""; showToast("Usando Clave del Servidor"); }
             updateStatus(); closeModal('settingsModal');
         }
 
@@ -355,7 +454,7 @@
             setTimeout(() => el.remove(), 4000);
         }
 
-        // --- LÓGICA CORE ---
+        // --- FUNCIONES CENTRALIZADAS DE LLAMADA A API (UN SOLO ENDPOINT) ---
         function cleanAndParseJSON(text) {
             const first = text.indexOf('{');
             const last = text.lastIndexOf('}');
@@ -363,49 +462,57 @@
             return JSON.parse(text.substring(first, last + 1));
         }
 
-        async function callGemini(prompt) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_KEY}`;
-            let attempts = 0;
-            while (attempts < 3) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        return data.candidates[0].content.parts[0].text;
-                    }
-                } catch (e) { console.warn(e); }
-                await new Promise(r => setTimeout(r, 1000));
-                attempts++;
-            }
-            throw new Error("IA no disponible");
+        async function callApi(payload, action) {
+            // Llama al único endpoint de backend: /api/apis
+            const response = await fetch(`/api/apis?action=${action}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            if (!response.ok) throw new Error("Error en el servidor de IA.");
+            const data = await response.json();
+
+            if (data.error) throw new Error(data.error);
+
+            return data;
         }
 
         // --- IMÁGENES ---
-        async function generateImageSmart(prompt) {
-            if(HF_TOKEN) {
-                try { return await generateImageHF(prompt); } catch(e) {}
+        async function generateImageSecure(prompt) {
+            const userToken = localStorage.getItem('ppt_hf_token');
+
+            try {
+                // Llama al backend con el prompt y el token opcional del usuario
+                const result = await callApi({ prompt: prompt, token: userToken }, 'image');
+                return result.image;
+            } catch(e) {
+                // Si el backend SDXL falla (Rate Limit del servidor), usamos el fallback Pollinations
+                console.warn("Fallo de Backend SDXL. Usando respaldo Pollinations.");
+                try { return await generateImagePollinations(prompt); } catch(e) { 
+                    console.error("Fallo Pollinations. Usando respaldo local.");
+                    return generateImageFallback(prompt);
+                }
             }
-            try { return await generateImagePollinations(prompt); } catch(e) {}
-            return generateImageFallback(prompt);
+        }
+        
+        // --- TEXTO ---
+        async function callGemini(prompt) {
+             try {
+                // Llama al backend para obtener la respuesta de texto
+                const result = await callApi({ prompt: prompt }, 'deck');
+                return result.text;
+            } catch(e) {
+                console.error("Fallo de Backend Gemini:", e);
+                throw new Error("El servicio de IA de texto no está disponible.");
+            }
         }
 
-        async function generateImageHF(prompt) {
-            const response = await fetch("https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0", {
-                method: "POST",
-                headers: { "Authorization": `Bearer ${HF_TOKEN}`, "Content-Type": "application/json" },
-                body: JSON.stringify({ inputs: prompt + ", photorealistic, 8k, high quality" }),
-            });
-            if (!response.ok) throw new Error("HF Error");
-            return blobToBase64(await response.blob());
-        }
-
+        // --- FALLBACKS ---
         async function generateImagePollinations(prompt) {
             const seed = Math.floor(Math.random() * 10000);
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=576&nologo=true&seed=${seed}`;
+            const encoded = encodeURIComponent(prompt + " realistic corporate");
+            const url = `https://image.pollinations.ai/prompt/${encoded}?width=1024&height=576&nologo=true&seed=${seed}`;
             const response = await fetch(url);
             if (!response.ok) throw new Error("Pollinations Error");
             return blobToBase64(await response.blob());
@@ -417,7 +524,7 @@
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = '#f1f5f9'; ctx.fillRect(0,0,1024,576);
             ctx.fillStyle = '#94a3b8'; ctx.font = '30px sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText('Imagen no disponible', 512, 288);
+            ctx.fillText('Imagen de Respaldo', 512, 288);
             return canvas.toDataURL('image/jpeg');
         }
 
@@ -444,7 +551,7 @@
             if(text) document.getElementById('loaderTitle').innerText = text;
         }
 
-        // --- GENERADOR ---
+        // --- GENERADOR PRINCIPAL ---
         async function generateDeck() {
             const topic = document.getElementById('topicInput').value.trim();
             if(!topic) return showToast("Escribe un tema primero", 'error');
@@ -463,7 +570,16 @@
                 updateProgressBar(30, "Estructurando...", "Diseñando diapositivas...");
                 
                 const data = cleanAndParseJSON(rawText);
-                const theme = { bg: '#ffffff', text: '#1e293b', accent: '#f97316' };
+                const html = document.documentElement;
+                const isDark = html.classList.contains('dark');
+                
+                // Usar colores adaptables basados en el tema actual
+                const theme = { 
+                    bg: isDark ? '#1e293b' : '#ffffff', 
+                    text: isDark ? '#f1f5f9' : '#1e293b', 
+                    accent: '#f97316' 
+                };
+                
                 pptTitle = data.title;
 
                 slides = data.slides.map((s, i) => ({ ...s, id: i, bg: theme.bg, text: theme.text, lineColor: theme.accent, imageData: null, imgLoading: false, layout: s.layout || 'split_right' }));
@@ -493,7 +609,7 @@
                     slides[i].imgLoading = true;
                     if(i === activeIndex) render();
                     
-                    slides[i].imageData = await generateImageSmart(slides[i].imagePrompt);
+                    slides[i].imageData = await generateImageSecure(slides[i].imagePrompt);
                     slides[i].imgLoading = false;
                     done++;
                     if(i === activeIndex) render();
@@ -513,13 +629,15 @@
                 const prompt = `Director de arte. Slide actual: "${s.content}". Prompt imagen: "${s.imagePrompt}". User: "${val}".
                 Responde JSON: { "content": "...", "imagePrompt": "...", "layout": "..." }`;
                 
-                const data = cleanAndParseJSON(await callGemini(prompt));
+                const rawText = await callGemini(prompt);
+                const data = cleanAndParseJSON(rawText);
+                
                 if(data.content) s.content = data.content;
                 if(data.layout) s.layout = data.layout;
                 if(data.imagePrompt && data.imagePrompt !== "null") {
                     updateProgressBar(50, "Nueva imagen...", "Generando...");
                     s.imagePrompt = data.imagePrompt;
-                    s.imageData = await generateImageSmart(data.imagePrompt);
+                    s.imageData = await generateImageSecure(data.imagePrompt);
                 }
                 updateProgressBar(100, "¡Hecho!", "Actualizando...");
                 render();
@@ -533,7 +651,7 @@
             if(!s.imagePrompt) return showToast("No hay prompt de imagen", 'error');
             showLoader(true);
             updateProgressBar(40, "Regenerando...", "Variación artística...");
-            s.imageData = await generateImageSmart(s.imagePrompt);
+            s.imageData = await generateImageSecure(s.imagePrompt);
             updateProgressBar(100, "¡Listo!", "Imagen actualizada");
             render();
             setTimeout(() => showLoader(false), 500);
@@ -545,35 +663,34 @@
             const canvas = document.getElementById('canvas');
             const strip = document.getElementById('slidesStrip');
 
-            if (!slide) { // Estado inicial vacío
-                return;
-            }
+            if (!slide) { return; }
 
+            // Usar los colores definidos en la slide (que se adaptan al tema)
             canvas.innerHTML = '';
             canvas.style.backgroundColor = slide.bg;
             canvas.style.color = slide.text;
 
             let imgHTML = '';
-            if (slide.imgLoading) imgHTML = `<div class="w-full h-full img-loader flex items-center justify-center text-slate-400 text-xs font-bold uppercase tracking-widest">Creando Arte...</div>`;
+            if (slide.imgLoading) imgHTML = `<div class="w-full h-full img-loader flex items-center justify-center text-secondary text-xs font-bold uppercase tracking-widest">Creando Arte...</div>`;
             else if (slide.imageData) imgHTML = `<img src="${slide.imageData}" class="w-full h-full object-cover" />`;
-            else imgHTML = `<div class="w-full h-full bg-slate-100 flex items-center justify-center text-xs text-slate-400">Sin Imagen</div>`;
+            else imgHTML = `<div class="w-full h-full bg-input flex items-center justify-center text-xs text-secondary">Sin Imagen</div>`;
 
             // Templates simples para renderizar
             if(slide.layout === 'background') {
                 canvas.innerHTML = `<div class="absolute inset-0 z-0">${imgHTML}</div><div class="absolute inset-0 bg-black/60 z-0"></div><div class="relative z-10 h-full flex flex-col justify-center text-center p-8 text-white"><h1 class="text-3xl font-bold mb-4 drop-shadow-lg">${slide.title}</h1><p class="text-lg opacity-90 drop-shadow-md whitespace-pre-line">${slide.content}</p></div>`;
             } else if(slide.layout === 'split_left') {
-                canvas.innerHTML = `<div class="grid grid-cols-2 h-full"><div class="relative border-r border-slate-100">${imgHTML}</div><div class="p-8 overflow-y-auto"><h2 class="text-2xl font-bold mb-4 border-b-2 pb-2 border-orange-100">${slide.title}</h2><div class="text-sm whitespace-pre-line opacity-80">${slide.content}</div></div></div>`;
+                canvas.innerHTML = `<div class="grid grid-cols-2 h-full"><div class="relative border-r border-border-color">${imgHTML}</div><div class="p-8 overflow-y-auto"><h2 class="text-2xl font-bold mb-4 border-b-2 pb-2 border-orange-500/20">${slide.title}</h2><div class="text-sm whitespace-pre-line opacity-80">${slide.content}</div></div></div>`;
             } else if(slide.layout === 'classic') {
-                canvas.innerHTML = `<div class="p-12 h-full flex flex-col"><h2 class="text-3xl font-bold mb-6 border-b-2 pb-4 border-orange-100 text-center">${slide.title}</h2><div class="text-base whitespace-pre-line opacity-80 flex-1">${slide.content}</div></div>`;
+                canvas.innerHTML = `<div class="p-12 h-full flex flex-col"><h2 class="text-3xl font-bold mb-6 border-b-2 pb-4 border-orange-500/20 text-center">${slide.title}</h2><div class="text-base whitespace-pre-line opacity-80 flex-1">${slide.content}</div></div>`;
             } else { // split_right
-                canvas.innerHTML = `<div class="grid grid-cols-2 h-full"><div class="p-8 overflow-y-auto"><h2 class="text-2xl font-bold mb-4 border-b-2 pb-2 border-orange-100">${slide.title}</h2><div class="text-sm whitespace-pre-line opacity-80">${slide.content}</div></div><div class="relative border-l border-slate-100">${imgHTML}</div></div>`;
+                canvas.innerHTML = `<div class="grid grid-cols-2 h-full"><div class="p-8 overflow-y-auto"><h2 class="text-2xl font-bold mb-4 border-b-2 pb-2 border-orange-500/20">${slide.title}</h2><div class="text-sm whitespace-pre-line opacity-80">${slide.content}</div></div><div class="relative border-l border-border-color">${imgHTML}</div></div>`;
             }
 
             // Tira de miniaturas
             strip.innerHTML = slides.map((s, i) => `
-                <div onclick="activeIndex=${i};render()" class="shrink-0 w-24 h-14 rounded border-2 cursor-pointer relative overflow-hidden transition-all ${i === activeIndex ? 'border-orange-500 shadow-md scale-105' : 'border-slate-200 opacity-60 hover:opacity-100'}" style="background-color:${s.bg}">
+                <div onclick="activeIndex=${i};render()" class="shrink-0 w-24 h-14 rounded border-2 cursor-pointer relative overflow-hidden transition-all ${i === activeIndex ? 'border-orange-500 shadow-md scale-105' : 'border-border-color opacity-60 hover:opacity-100'}" style="background-color:${s.bg}">
                     ${s.imageData ? `<img src="${s.imageData}" class="absolute inset-0 w-full h-full object-cover opacity-50">` : ''}
-                    <div class="absolute inset-0 flex items-center justify-center font-bold text-xs z-10 text-slate-800">${i+1}</div>
+                    <div class="absolute inset-0 flex items-center justify-center font-bold text-xs z-10 text-primary">${i+1}</div>
                 </div>
             `).join('');
             
@@ -587,7 +704,10 @@
             pres.layout = 'LAYOUT_16x9'; pres.title = pptTitle;
             slides.forEach(s => {
                 const slide = pres.addSlide();
-                slide.background = { color: s.bg };
+                // Usar colores estáticos para la PPT final (no CSS variables)
+                slide.background = { color: s.bg.startsWith('#') ? s.bg.substring(1) : 'FFFFFF' }; 
+                
+                const textColor = s.text.startsWith('#') ? s.text.substring(1) : '1E293B'; 
                 const hasImg = s.imageData && s.layout !== 'classic';
                 
                 if(s.layout === 'background' && hasImg) {
@@ -597,14 +717,14 @@
                     slide.addText(s.content, { x:1, y:'60%', w:'80%', fontSize:18, align:'center', color:'FFFFFF' });
                 } else if(s.layout === 'split_left' && hasImg) {
                     slide.addImage({ data: s.imageData, x:0, y:0, w:'50%', h:'100%' });
-                    slide.addText(s.title, { x:'55%', y:0.5, w:'40%', fontSize:24, bold:true, color:s.text });
-                    slide.addText(s.content, { x:'55%', y:1.5, w:'40%', h:4.5, fontSize:14, color:s.text, valign:'top' });
-                } else if(s.layout === 'classic') {
-                    slide.addText(s.title, { x:0.5, y:0.5, w:'90%', fontSize:32, bold:true, align:'center', color:s.text });
-                    slide.addText(s.content, { x:0.5, y:1.5, w:'90%', h:4.5, fontSize:16, color:s.text, valign:'top' });
+                    slide.addText(s.title, { x:'55%', y:0.5, w:'40%', fontSize:24, bold:true, color:textColor });
+                    slide.addText(s.content, { x:'55%', y:1.5, w:'40%', h:4.5, fontSize:14, color:textColor, valign:'top' });
+                } else if (s.layout === 'classic') {
+                    slide.addText(s.title, { x:0.5, y:0.5, w:'90%', fontSize:32, bold:true, align:'center', color:textColor });
+                    slide.addText(s.content, { x:0.5, y:1.5, w:'90%', h:4.5, fontSize:16, color:textColor, valign:'top' });
                 } else { // split_right
-                    slide.addText(s.title, { x:0.5, y:0.5, w:'45%', fontSize:24, bold:true, color:s.text });
-                    slide.addText(s.content, { x:0.5, y:1.5, w:'45%', h:4.5, fontSize:14, color:s.text, valign:'top' });
+                    slide.addText(s.title, { x:0.5, y:0.5, w:'45%', fontSize:24, bold:true, color:textColor });
+                    slide.addText(s.content, { x:0.5, y:1.5, w:'45%', h:4.5, fontSize:14, color:textColor, valign:'top' });
                     if(hasImg) slide.addImage({ data: s.imageData, x:'50%', y:0, w:'50%', h:'100%' });
                 }
             });
