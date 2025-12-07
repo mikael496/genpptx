@@ -95,9 +95,11 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.9);
             z-index: 10000; /* Alto para asegurar que cubra todo */
-            display: none; /* Inicialmente oculto */
+            display: none; /* Inicialmente oculto por defecto */
             justify-content: center;
             align-items: center;
+            opacity: 0; /* Aseguramos que esté oculto */
+            transition: opacity 0.5s;
         }
 
         /* Estilo para el señuelo de detección (Bait) */
@@ -433,6 +435,8 @@
             const isDevMode = urlParams.get('devmode') === 'true';
 
             if (isDevMode) {
+                // Modo Desarrollador: Aseguramos que el scroll esté habilitado
+                document.body.style.overflow = ''; 
                 console.log("Modo Desarrollador Activo: Detección de AdBlock Ignorada.");
                 return; // Sale de la función, no hace nada
             }
@@ -443,9 +447,15 @@
             
             // Detecta si el AdBlocker ha ocultado el elemento de señuelo (su offsetHeight será 0)
             if (adBait && adBait.offsetHeight === 0) {
-                // AdBlocker detectado: Muestra el overlay y bloquea el scroll
-                overlay.style.display = 'flex';
+                // AdBlocker detectado:
+                
+                // 1. Bloquea el scroll (Esto ya estaba funcionando)
                 document.body.style.overflow = 'hidden';
+                
+                // 2. Muestra el overlay forzando los estilos (CORRECCIÓN CLAVE)
+                overlay.style.setProperty('display', 'flex', 'important');
+                overlay.style.setProperty('opacity', '1', 'important');
+                
                 console.warn("ADBLOCK DETECTADO: El uso de la página ha sido bloqueado.");
             } else {
                 // No se detectó AdBlocker o el usuario lo ha deshabilitado
