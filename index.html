@@ -6,11 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Generador de presentaciones PowerPoint gratuito con Inteligencia Artificial. Crea diapositivas, textos e imágenes con IA en segundos.">
     
+    <!-- **** ETIQUETA DE VERIFICACIÓN ADSENSE **** -->
+    <meta name="google-adsense-account" content="ca-pub-1999008844241347"> 
+    
+    <!-- **** SCRIPT DE ANUNCIOS ADSENSE **** -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1999008844241347"
+      crossorigin="anonymous"></script>
+    
     <!-- FAVICON PREMIUM -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f97316'/%3E%3Cstop offset='100%25' stop-color='%23db2777'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='120' fill='url(%23g)'/%3E%3Crect x='100' y='140' width='312' height='200' rx='20' fill='white'/%3E%3Cpath d='M256 340v80m-60 0h120' stroke='white' stroke-width='40' stroke-linecap='round' opacity='0.9'/%3E%3C/svg%3E" type="image/svg+xml">
     
     <title>genpptx - Generador de PPT con IA</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1999008844241347" crossorigin="anonymous"></script>
+    
     <!-- LIBRERÍAS -->
     <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -184,42 +191,56 @@
             </div>
         </div>
         
-        <!-- SECCIÓN SEO: CONTENIDO PARA ADSENSE -->
+        <!-- SECCIÓN SEO: CONTENIDO PARA ADSENSE (AMPLIADA) -->
         <article class="max-w-4xl mx-auto prose prose-sm md:prose-base mt-12 mb-20 px-4" style="color: var(--text-primary);">
             <hr class="border-border-color mb-12">
             
-            <h2 id="como-funciona" class="text-2xl font-bold text-primary mb-4">¿Cómo funciona genpptx?</h2>
+            <h2 id="como-funciona" class="text-2xl font-bold text-primary mb-4">La Inteligencia Artificial al servicio de la Productividad: ¿Cómo funciona genpptx?</h2>
             <p style="color: var(--text-secondary);">
-                <strong>genpptx</strong> es una herramienta avanzada que combina la potencia de modelos de lenguaje grandes (como Gemini) con generadores de imágenes de última generación (SDXL) para automatizar la creación de presentaciones profesionales.
+                En un mundo donde el tiempo es el recurso más valioso, **genpptx** se posiciona como el asistente definitivo para profesionales, estudiantes y educadores. Nuestro sistema avanzado combina dos pilares de la IA moderna: modelos de lenguaje grandes (LLMs) y generadores de imágenes de última generación (como SDXL) para automatizar el tedioso proceso de crear diapositivas.
             </p>
             <p style="color: var(--text-secondary);">
-                A diferencia de las plantillas tradicionales, nuestra IA analiza tu tema y estructura una narrativa completa: desde la introducción hasta las conclusiones. No solo escribe el texto, sino que actúa como un <em>Director de Arte</em> digital, decidiendo qué diseño visual (layout) se adapta mejor a cada diapositiva y generando imágenes únicas y libres de derechos para ilustrar tus ideas.
+                La magia comienza cuando introduces un tema simple, como "Los efectos del cambio climático en la economía global". La IA no solo busca datos, sino que **estructura una narrativa coherente** que respeta la lógica de una presentación profesional: define la introducción, desarrolla los puntos clave en secciones lógicas, y concluye con llamadas a la acción o resúmenes claros.
             </p>
+            
+            <h3 class="text-xl font-bold text-primary mt-8 mb-3">Flujo de Trabajo Detallado de la IA</h3>
+            <ol class="list-decimal pl-5 space-y-2" style="color: var(--text-secondary);">
+                <li>**Análisis de Prompt y Estructura:** El modelo de lenguaje (Gemini) recibe el tema, lo analiza y genera un archivo JSON que mapea la presentación completa: títulos, contenido (puntos clave y párrafos), y las instrucciones visuales (`imagePrompt`, `layout`) para cada slide.</li>
+                <li>**Generación de Activos Visuales:** Para cada slide que requiere una imagen, la descripción visual se envía a nuestro generador SDXL. Esto garantiza que cada diapositiva tenga una imagen única, de alta resolución (16:9), y relevante al contexto, evitando problemas de derechos de autor.</li>
+                <li>**Ensamblaje y Exportación:** El frontend utiliza la librería PPTXGenJS para tomar la estructura de texto y las imágenes Base64 generadas, y las ensambla en un archivo `.pptx` editable.</li>
+            </ol>
 
-            <h3 id="caracteristicas" class="text-xl font-bold text-primary mt-8 mb-3">Características Principales</h3>
+            <h2 id="caracteristicas" class="text-2xl font-bold text-primary mt-10 mb-4">Características Clave para una Creación de Contenido Eficiente</h2>
             <ul class="list-disc pl-5 space-y-2" style="color: var(--text-secondary);">
-                <li><strong>Generación Instantánea:</strong> Obtén una presentación de 6-10 diapositivas en menos de un minuto.</li>
-                <li><strong>Imágenes con IA (SDXL):</strong> Cada diapositiva incluye imágenes generadas artificialmente y adaptadas al contexto del texto.</li>
-                <li><strong>Edición Conversacional:</strong> ¿No te gusta algo? Simplemente chatea con la IA ("Pon la imagen a la izquierda", "Haz el texto más corto") y verás los cambios al instante.</li>
-                <li><strong>Exportación Nativa:</strong> Descarga el resultado final en formato <code>.pptx</code> editable, compatible con Microsoft PowerPoint, Google Slides y Keynote.</li>
-                <li><strong>Privacidad Primero:</strong> No almacenamos tus datos. Todo el proceso ocurre en tu navegador y mediante conexiones seguras a las APIs.</li>
+                <li>**Generación Instantánea de Contenido:** Reduce el tiempo de creación de horas a minutos. Una presentación completa de 8-10 diapositivas está lista para revisión en menos de 60 segundos.</li>
+                <li>**Imágenes Contextuales con IA:** Cada imagen está diseñada para complementar y reforzar el mensaje de la diapositiva, no solo para decorar.</li>
+                <li>**Edición Conversacional Única:** ¿Necesitas un tono más formal o un texto más conciso? Usa el campo de edición por IA para modificar *al instante* el texto y las imágenes de la diapositiva activa mediante lenguaje natural.</li>
+                <li>**Exportación Universal (.pptx):** Total compatibilidad con Microsoft PowerPoint, Keynote de Apple y Google Slides, lo que garantiza que el producto final esté listo para ser presentado en cualquier entorno.</li>
+                <li>**Diseño Adaptativo y Modo Oscuro:** La interfaz está optimizada para la productividad tanto en dispositivos móviles como de escritorio, con un modo oscuro por defecto para reducir la fatiga visual.</li>
             </ul>
 
-            <h3 class="text-xl font-bold text-primary mt-8 mb-3">Preguntas Frecuentes</h3>
+            <h3 class="text-xl font-bold text-primary mt-8 mb-3">Compromiso con la Calidad y la Seguridad</h3>
             <div class="space-y-4">
                 <details class="group bg-input p-4 rounded-lg cursor-pointer">
                     <summary class="font-bold text-primary list-none flex justify-between items-center">
-                        ¿Es gratuito usar genpptx?
+                        ¿Cómo aseguran la calidad del contenido generado?
                         <span class="transition group-open:rotate-180 text-secondary"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>
                     </summary>
-                    <p class="text-secondary mt-2 text-sm">Sí, la herramienta básica es de uso gratuito. Utilizamos tokens de APIs públicas para democratizar el acceso a la creación de contenido con IA.</p>
+                    <p class="text-secondary mt-2 text-sm">Utilizamos modelos de IA de Google (Gemini) líderes en el sector y aplicamos prompts de sistema especializados que obligan a la IA a verificar la coherencia lógica y la precisión informativa de cada diapositiva antes de la generación final. Esto minimiza errores y maximiza la relevancia.</p>
                 </details>
                 <details class="group bg-input p-4 rounded-lg cursor-pointer">
                     <summary class="font-bold text-primary list-none flex justify-between items-center">
-                        ¿Las imágenes tienen derechos de autor?
+                        ¿Las imágenes tienen derechos de autor y se pueden usar comercialmente?
                         <span class="transition group-open:rotate-180 text-secondary"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>
                     </summary>
-                    <p class="text-secondary mt-2 text-sm">Las imágenes generadas por IA (Stable Diffusion XL) son generalmente libres de derechos de autor y pueden usarse para fines personales o comerciales, aunque te recomendamos revisar las leyes locales sobre arte generativo.</p>
+                    <p class="text-secondary mt-2 text-sm">Las imágenes son generadas por modelos de difusión avanzados (Stable Diffusion XL) y son consideradas arte generativo. Legalmente, pueden usarse para fines personales o comerciales, pero siempre recomendamos a nuestros usuarios revisar las políticas de derechos de autor en su jurisdicción local, ya que las leyes sobre arte generado por IA están evolucionando.</p>
+                </details>
+                <details class="group bg-input p-4 rounded-lg cursor-pointer">
+                    <summary class="font-bold text-primary list-none flex justify-between items-center">
+                        ¿Es necesario instalar software adicional?
+                        <span class="transition group-open:rotate-180 text-secondary"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>
+                    </summary>
+                    <p class="text-secondary mt-2 text-sm">Absolutamente no. genpptx es una aplicación web pura. Todo el procesamiento de IA ocurre en el servidor y la descarga del archivo PPTX final se realiza directamente en tu navegador. Funciona perfectamente en cualquier sistema operativo y navegador moderno.</p>
                 </details>
             </div>
         </article>
@@ -360,26 +381,51 @@
         let activeIndex = 0;
         let pptTitle = "Presentación";
 
-        // --- CONTENIDO LEGAL (Para inyectar en el modal) ---
+        // --- CONTENIDO LEGAL (ADAPTADO A ECUADOR) ---
         const legalTexts = {
             privacy: `
-                <h2>Política de Privacidad</h2>
-                <p>En genpptx, valoramos tu privacidad. Esta política explica cómo manejamos tu información.</p>
-                <h3>Recopilación de Datos</h3>
-                <p>No recopilamos ni almacenamos datos personales en nuestros servidores. Toda la generación de contenido ocurre en tiempo real y se procesa mediante APIs seguras. No guardamos tus presentaciones ni tus textos.</p>
-                <h3>Cookies</h3>
-                <p>Utilizamos almacenamiento local (LocalStorage) en tu navegador únicamente para recordar tu configuración de API Token, si decides cambiarla. No usamos cookies de rastreo publicitario intrusivo.</p>
-                <h3>Servicios de Terceros</h3>
-                <p>Utilizamos las APIs de Google Gemini y Hugging Face para generar contenido. Al usar esta herramienta, aceptas que los prompts (textos) que envías sean procesados por estos servicios únicamente para generar el resultado solicitado.</p>
+                <h2>Política de Privacidad de genpptx</h2>
+                <p><strong>Fecha de Vigencia: 7 de diciembre de 2025</strong></p>
+                <p>En genpptx, valoramos y respetamos su privacidad. Dado que somos una aplicación impulsada por Inteligencia Artificial y no requerimos registro de usuario, nuestra política de recopilación de datos es mínima y transparente, **regida por la Ley Orgánica de Protección de Datos Personales (LOPDP) del Ecuador.**</p>
+                
+                <h3>1. Datos Personales</h3>
+                <p>No recopilamos ni almacenamos en nuestros servidores datos personales identificables, como nombres, direcciones de correo electrónico o información de pago. Al no existir cuentas de usuario, no tenemos bases de datos de información personal. Nuestro servicio está diseñado para funcionar sin necesidad de identificar al usuario.</p>
+
+                <h3>2. Tratamiento de Prompts por la IA</h3>
+                <p>Los textos (prompts) que usted introduce para generar la presentación son tratados como información de uso temporal y se procesan a través de APIs de terceros (Gemini de Google y Stable Diffusion de Hugging Face). Estos datos se utilizan únicamente para generar la respuesta solicitada (texto, imágenes o edición) y no se almacenan permanentemente en nuestros sistemas. Al usar la herramienta, usted acepta las políticas de privacidad de estos proveedores de servicios de IA.</p>
+
+                <h3>3. Almacenamiento Local (Cookies y LocalStorage)</h3>
+                <p>Utilizamos el almacenamiento local (LocalStorage) de su navegador para recordar exclusivamente dos elementos:</p>
+                <ul>
+                    <li>Su preferencia de tema (Modo Oscuro/Claro).</li>
+                    <li>Su token personal de Hugging Face (si decide introducir uno para uso avanzado).</li>
+                </ul>
+                <p>Estos datos permanecen en su dispositivo y nunca se transmiten a nuestros servidores ni a terceros con fines de rastreo publicitario. Esta práctica cumple con los principios de minimización de datos establecidos en la LOPDP.</p>
+
+                <h3>4. Derechos del Titular de Datos</h3>
+                <p>Aunque no procesamos datos personales, reconocemos los derechos del titular de datos establecidos en la LOPDP, incluyendo el derecho de acceso, rectificación y eliminación, los cuales aplican sobre la información mínima almacenada localmente en su dispositivo y pueden ser ejercidos eliminando la información de su navegador o contactándonos.</p>
             `,
             terms: `
-                <h2>Términos de Uso</h2>
-                <p>Al utilizar genpptx, aceptas los siguientes términos:</p>
+                <h2>Términos de Uso del Servicio genpptx</h2>
+                <p><strong>Última Actualización: 7 de diciembre de 2025</strong></p>
+                <p>Al acceder y utilizar el servicio genpptx (el "Servicio"), usted acepta estar sujeto a estos Términos de Uso.</p>
+                
+                <h3>1. Aceptación del Servicio "Tal Cual"</h3>
+                <p>El Servicio se proporciona "tal cual" y "según disponibilidad". No ofrecemos ninguna garantía, expresa o implícita, sobre la precisión, fiabilidad o idoneidad de las presentaciones generadas por IA para un propósito específico.</p>
+                
+                <h3>2. Propiedad Intelectual y Derechos de Autor del Contenido Generado</h3>
+                <p>El contenido generado (textos e imágenes) es creado por modelos de IA avanzados.</p>
                 <ul>
-                    <li>El servicio se proporciona "tal cual", sin garantías de disponibilidad absoluta.</li>
-                    <li>Eres responsable del contenido que generas. No permitimos el uso de la herramienta para crear contenido ilegal, ofensivo o dañino.</li>
-                    <li>Las imágenes y textos generados por IA son para tu uso, pero no garantizamos la exclusividad de los mismos.</li>
+                    <li><strong>Textos:</strong> Los textos son generalmente libres para su uso. Usted es responsable de verificar la precisión y originalidad.</li>
+                    <li><strong>Imágenes:</strong> Las imágenes generadas por Stable Diffusion XL son consideradas arte de IA y generalmente se consideran libres para uso personal y comercial, sujeto a las licencias de código abierto del modelo base. Usted asume la responsabilidad legal de su uso final.</li>
                 </ul>
+                
+                <h3>3. Contenido Prohibido</h3>
+                <p>Usted se compromete a no utilizar el Servicio para generar ni distribuir contenido que sea ilegal, difamatorio, obsceno, abusivo, que infrinja derechos de propiedad intelectual, o que promueva la violencia o la discriminación.</p>
+                
+                <h3>4. Ley Aplicable y Jurisdicción</h3>
+                <p>Estos Términos de Uso se rigen e interpretan de acuerdo con las **leyes de la República del Ecuador**.</p>
+                <p>Cualquier controversia o disputa que surja en relación con estos términos o el uso del Servicio será sometida a la jurisdicción de los tribunales competentes en el **Ecuador**, renunciando a cualquier otra jurisdicción que pudiera corresponder por razón de su domicilio presente o futuro.</p>
             `,
             contact: `
                 <h2>Contacto</h2>
