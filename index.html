@@ -101,13 +101,14 @@
         }
 
         /* Estilo para el señuelo de detección (Bait) */
+        /* Hacemos el cebo más grande para que sea detectado por filtros basados en dimensiones */
         .ad-test-unit {
             /* Clases y estilos que son comúnmente bloqueados */
             position: absolute;
-            top: -100px;
-            left: -100px;
-            width: 1px;
-            height: 1px;
+            top: -1000px; /* Lo movemos más lejos */
+            left: -1000px;
+            width: 300px; /* Dimensiones típicas de un anuncio */
+            height: 250px;
             visibility: hidden;
             pointer-events: none;
             z-index: -10000;
@@ -137,7 +138,8 @@
     </div>
     
     <!-- SEÑUELO DE DETECCIÓN ADBLOCK (Bait) -->
-    <div id="ad-test-unit" class="ad-test-unit banner-ad-unit-test"></div>
+    <!-- Clases universales añadidas: ad-banner-widget y ads-300x250 -->
+    <div id="ad-test-unit" class="ad-test-unit ad-banner-widget ads-300x250"></div>
 
     <!-- HEADER / NAVBAR -->
     <header class="h-16 bg-header border-b border-border-color flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-sm shrink-0">
