@@ -391,8 +391,7 @@
             html.classList.add(storedTheme);
             updateThemeIcons(storedTheme);
             
-            // Llama a la detección de AdBlock después de cargar el tema
-            checkAdBlock(); 
+            // La detección de AdBlock se ejecuta con un retraso en window.onload
         }
 
         function toggleTheme() {
@@ -427,7 +426,7 @@
             lucide.createIcons();
         }
         
-        // --- DETECCIÓN ADBLOCK ---
+        // --- DETECCIÓN ADBLOCK (EJECUCIÓN RETRASADA PARA MAYOR FIABILIDAD) ---
         function checkAdBlock() {
             // Comprueba si el parámetro devmode=true está en la URL (para ignorarte a ti)
             const urlParams = new URLSearchParams(window.location.search);
@@ -442,7 +441,7 @@
             const adBait = document.getElementById('ad-test-unit');
             const overlay = document.getElementById('adBlockOverlay');
             
-            // Detecta si el AdBlocker ha ocultado el elemento de señuelo (su altura será 0)
+            // Detecta si el AdBlocker ha ocultado el elemento de señuelo (su offsetHeight será 0)
             if (adBait && adBait.offsetHeight === 0) {
                 // AdBlocker detectado: Muestra el overlay y bloquea el scroll
                 overlay.style.display = 'flex';
@@ -520,10 +519,14 @@
         };
 
         window.onload = () => {
-            loadTheme(); // Llama a checkAdBlock()
+            loadTheme();
             lucide.createIcons();
             updateStatus();
             document.getElementById('hfTokenInput').value = HF_TOKEN;
+            
+            // CORRECCIÓN: Ejecutar la detección de AdBlock con un ligero retraso (100ms) 
+            // para darle tiempo al AdBlocker a aplicar sus estilos.
+            setTimeout(checkAdBlock, 100); 
         };
 
         // --- INTERFAZ & MODALES ---
