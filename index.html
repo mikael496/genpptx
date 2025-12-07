@@ -720,6 +720,7 @@
                 const html = document.documentElement;
                 const isDark = html.classList.contains('dark');
                 const theme = { 
+                    // Establecemos un fondo por defecto claro u oscuro basado en el tema
                     bg: isDark ? '#1e293b' : '#ffffff', 
                     text: isDark ? '#f1f5f9' : '#1e293b', 
                     accent: '#f97316' 
@@ -729,7 +730,7 @@
                 slides = parsedSlides.map((s, i) => ({ 
                     ...s, 
                     id: i, 
-                    bg: theme.bg, 
+                    bg: theme.bg, // Usamos el color de fondo del tema por defecto, la IA lo cambiará
                     text: theme.text, 
                     lineColor: theme.accent, 
                     imgLoading: false, 
@@ -877,7 +878,8 @@
                 Para CADA slide:
                 1. "imagePrompt": Descripción visual en Inglés (o null).
                 2. "layout": "background" (portada), "split_right", "split_left", "classic".
-                Responde JSON: { "title": "Titulo", "slides": [{ "title": "...", "content": "...", "imagePrompt": "...", "layout": "..." }] }`;
+                3. "backgroundColor": Color HEX o nombre de color (ej. #FFFFFF, 'dark blue').
+                Responde JSON: { "title": "Titulo", "slides": [{ "title": "...", "content": "...", "imagePrompt": "...", "layout": "...", "backgroundColor": "..." }] }`;
 
                 const rawText = await callGemini(prompt);
                 updateProgressBar(30, "Estructurando...", "Diseñando diapositivas...");
@@ -895,7 +897,17 @@
                 
                 pptTitle = data.title;
 
-                slides = data.slides.map((s, i) => ({ ...s, id: i, bg: theme.bg, text: theme.text, lineColor: theme.accent, imageData: null, imgLoading: false, layout: s.layout || 'split_right' }));
+                slides = data.slides.map((s, i) => ({ 
+                    ...s, 
+                    id: i, 
+                    // Usa el color devuelto por la IA o el color del tema por defecto
+                    bg: s.backgroundColor || theme.bg, 
+                    text: theme.text, 
+                    lineColor: theme.accent, 
+                    imageData: null, 
+                    imgLoading: false, 
+                    layout: s.layout || 'split_right' 
+                }));
 
                 activeIndex = 0;
                 render();
@@ -940,15 +952,18 @@
             
             const s = slides[activeIndex];
             try {
-                // Nota: Usamos el contenido actual de la diapositiva y el prompt de edición
-                const prompt = `Director de arte. Edita el siguiente contenido basado en la solicitud: Contenido actual: "${s.content}". Solicitud: "${val}".
-                Responde JSON: { "content": "...", "imagePrompt": "...", "layout": "..." }`;
+                // Se solicita a Gemini el campo backgroundColor
+                const prompt = `Director de arte. Edita el siguiente contenido basado en la solicitud: Contenido actual: "${s.content}". Solicitud: "${val}". Color de fondo actual: "${s.bg}".
+                Responde JSON: { "content": "...", "imagePrompt": "...", "layout": "...", "backgroundColor": "..." }`;
                 
                 const rawText = await callGemini(prompt);
                 const data = cleanAndParseJSON(rawText);
                 
                 if(data.content) s.content = data.content;
                 if(data.layout) s.layout = data.layout;
+                // APLICAR NUEVO COLOR DE FONDO
+                if(data.backgroundColor) s.bg = data.backgroundColor;
+
                 // Si la IA devuelve un nuevo prompt de imagen o la imagen existente es solo un marcador
                 if(data.imagePrompt && data.imagePrompt !== "null") {
                     updateProgressBar(50, "Nueva imagen...", "Generando...");
@@ -984,7 +999,19 @@
             // Usar los colores definidos en la slide (que se adaptan al tema)
             canvas.innerHTML = '';
             canvas.style.backgroundColor = slide.bg;
-            canvas.style.color = slide.text;
+            
+            // Heurística simple para cambiar el color del texto si el fondo es oscuro
+            let textColor = slide.text; 
+            const isDark = (slide.bg.toLowerCase().includes('dark') || slide.bg.includes('#1e293b') || slide.bg.includes('#000000'));
+            if (isDark) {
+                textColor = '#f1f5f9'; // Blanco
+            } else if (slide.bg.startsWith('#') && parseInt(slide.bg.slice(1), 16) < 0x888888) {
+                 textColor = '#f1f5f9'; // Blanco para fondos oscuros HEX
+            } else {
+                 textColor = '#1e293b'; // Negro para fondos claros
+            }
+            canvas.style.color = textColor;
+
 
             let imgHTML = '';
             if (slide.imgLoading) imgHTML = `<div class="w-full h-full img-loader flex items-center justify-center text-secondary text-xs font-bold uppercase tracking-widest">Creando Arte...</div>`;
@@ -995,11 +1022,11 @@
             if(slide.layout === 'background') {
                 canvas.innerHTML = `<div class="absolute inset-0 z-0">${imgHTML}</div><div class="absolute inset-0 bg-black/60 z-0"></div><div class="relative z-10 h-full flex flex-col justify-center text-center p-8 text-white"><h1 class="text-3xl font-bold mb-4 drop-shadow-lg">${slide.title}</h1><p class="text-lg opacity-90 drop-shadow-md whitespace-pre-line">${slide.content}</p></div>`;
             } else if(slide.layout === 'split_left') {
-                canvas.innerHTML = `<div class="grid grid-cols-2 h-full"><div class="relative border-r border-border-color">${imgHTML}</div><div class="p-8 overflow-y-auto"><h2 class="text-2xl font-bold mb-4 border-b-2 pb-2 border-orange-500/20">${slide.title}</h2><div class="text-sm whitespace-pre-line opacity-80">${slide.content}</div></div></div>`;
+                canvas.innerHTML = `<div class="grid grid-cols-2 h-full"><div class="relative border-r border-border-color">${imgHTML}</div><div class="p-8 overflow-y-auto" style="color:${textColor};"><h2 class="text-2xl font-bold mb-4 border-b-2 pb-2 border-orange-500/20">${slide.title}</h2><div class="text-sm whitespace-pre-line opacity-80">${slide.content}</div></div></div>`;
             } else if(slide.layout === 'classic') {
-                canvas.innerHTML = `<div class="p-12 h-full flex flex-col"><h2 class="text-3xl font-bold mb-6 border-b-2 pb-4 border-orange-500/20 text-center">${slide.title}</h2><div class="text-base whitespace-pre-line opacity-80 flex-1">${slide.content}</div></div>`;
+                canvas.innerHTML = `<div class="p-12 h-full flex flex-col" style="color:${textColor};"><h2 class="text-3xl font-bold mb-6 border-b-2 pb-4 border-orange-500/20 text-center">${slide.title}</h2><div class="text-base whitespace-pre-line opacity-80 flex-1">${slide.content}</div></div>`;
             } else { // split_right
-                canvas.innerHTML = `<div class="grid grid-cols-2 h-full"><div class="p-8 overflow-y-auto"><h2 class="text-2xl font-bold mb-4 border-b-2 pb-2 border-orange-500/20">${slide.title}</h2><div class="text-sm whitespace-pre-line opacity-80">${slide.content}</div></div><div class="relative border-l border-border-color">${imgHTML}</div></div>`;
+                canvas.innerHTML = `<div class="grid grid-cols-2 h-full"><div class="p-8 overflow-y-auto" style="color:${textColor};"><h2 class="text-2xl font-bold mb-4 border-b-2 pb-2 border-orange-500/20">${slide.title}</h2><div class="text-sm whitespace-pre-line opacity-80">${slide.content}</div></div><div class="relative border-l border-border-color">${imgHTML}</div></div>`;
             }
 
             // Tira de miniaturas
@@ -1018,12 +1045,35 @@
             if(slides.length === 0) return showToast("Genera una presentación primero", 'error');
             const pres = new PptxGenJS();
             pres.layout = 'LAYOUT_16x9'; pres.title = pptTitle;
+            
+            // Función para obtener el color del texto de contraste para PPTX
+            function getContrastTextColor(hexColor) {
+                // Convierte el color a formato sin '#' y lo expande si es shorthand (e.g., #333 -> #333333)
+                const color = hexColor.replace('#', '').length === 3 ? hexColor.replace('#', '').split('').map(c => c + c).join('') : hexColor.replace('#', '');
+                if (color.length !== 6) return '1E293B'; // Color de texto oscuro por defecto
+                
+                // Convertir HEX a RGB
+                const r = parseInt(color.substring(0, 2), 16);
+                const g = parseInt(color.substring(2, 4), 16);
+                const b = parseInt(color.substring(4, 6), 16);
+                
+                // Calcular luminancia (YIQ NTSC conversion)
+                const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+                
+                // Usar texto blanco (FFFFFF) si el fondo es oscuro, texto oscuro (1E293B) si es claro
+                return (yiq >= 160) ? '1E293B' : 'FFFFFF';
+            }
+
             slides.forEach(s => {
                 const slide = pres.addSlide();
-                // Usar colores estáticos para la PPT final (no CSS variables)
-                slide.background = { color: s.bg.startsWith('#') ? s.bg.substring(1) : 'FFFFFF' }; 
                 
-                const textColor = s.text.startsWith('#') ? s.text.substring(1) : '1E293B'; 
+                // 1. Establecer color de fondo
+                const bgColor = s.bg.startsWith('#') ? s.bg.substring(1) : (s.bg.toLowerCase().includes('dark') ? '1E293B' : 'FFFFFF');
+                slide.background = { color: bgColor }; 
+                
+                // 2. Determinar color de texto de contraste
+                const textColor = getContrastTextColor('#' + bgColor);
+                
                 const hasImg = s.imageData && s.layout !== 'classic';
                 
                 if(s.layout === 'background' && hasImg) {
