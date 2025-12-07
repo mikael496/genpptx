@@ -85,9 +85,59 @@
         .active-thumb { border-color: #f97316; box-shadow: 0 0 0 2px #ffedd5; transform: scale(1.05); }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
         @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Estilo para el Overlay de AdBlock */
+        .adblock-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000; /* Alto para asegurar que cubra todo */
+            display: none; /* Inicialmente oculto */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Estilo para el señuelo de detección (Bait) */
+        .ad-test-unit {
+            /* Clases y estilos que son comúnmente bloqueados */
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            width: 1px;
+            height: 1px;
+            visibility: hidden;
+            pointer-events: none;
+            z-index: -10000;
+        }
     </style>
 </head>
 <body class="bg-page flex flex-col font-sans text-primary">
+
+    <!-- OVERLAY DETECCIÓN ADBLOCK (POP-UP) -->
+    <div id="adBlockOverlay" class="adblock-overlay">
+        <div class="bg-card p-8 md:p-12 rounded-2xl max-w-lg text-center shadow-2xl transform transition-all duration-300 scale-100">
+            <div class="text-orange-500 mb-6 mx-auto bg-orange-100/50 p-4 rounded-full w-fit">
+                <i data-lucide="shield-off" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-3 text-primary">¡Detector de Bloqueadores Activo!</h2>
+            <p class="text-secondary mb-6">
+                Para mantener **genpptx** gratuito y en funcionamiento, dependemos de la publicidad. 
+                Detectamos que su bloqueador de anuncios está activo.
+            </p>
+            <p class="text-sm font-medium text-primary mb-8">
+                Por favor, deshabilite su bloqueador de anuncios para este sitio o añada nuestro dominio a la lista blanca para continuar.
+            </p>
+            <button onclick="window.location.reload();" class="w-full bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-500 hover:to-pink-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg active:scale-95 transition-all">
+                Hecho, Recargar la Página
+            </button>
+        </div>
+    </div>
+    
+    <!-- SEÑUELO DE DETECCIÓN ADBLOCK (Bait) -->
+    <div id="ad-test-unit" class="ad-test-unit banner-ad-unit-test"></div>
 
     <!-- HEADER / NAVBAR -->
     <header class="h-16 bg-header border-b border-border-color flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-sm shrink-0">
@@ -338,6 +388,9 @@
             html.classList.remove('light', 'dark');
             html.classList.add(storedTheme);
             updateThemeIcons(storedTheme);
+            
+            // Llama a la detección de AdBlock después de cargar el tema
+            checkAdBlock(); 
         }
 
         function toggleTheme() {
@@ -370,6 +423,34 @@
             if (settingIcon) settingIcon.setAttribute('data-lucide', iconName);
             
             lucide.createIcons();
+        }
+        
+        // --- DETECCIÓN ADBLOCK ---
+        function checkAdBlock() {
+            // Comprueba si el parámetro devmode=true está en la URL (para ignorarte a ti)
+            const urlParams = new URLSearchParams(window.location.search);
+            const isDevMode = urlParams.get('devmode') === 'true';
+
+            if (isDevMode) {
+                console.log("Modo Desarrollador Activo: Detección de AdBlock Ignorada.");
+                return; // Sale de la función, no hace nada
+            }
+
+            // Lógica de detección normal para el público
+            const adBait = document.getElementById('ad-test-unit');
+            const overlay = document.getElementById('adBlockOverlay');
+            
+            // Detecta si el AdBlocker ha ocultado el elemento de señuelo (su altura será 0)
+            if (adBait && adBait.offsetHeight === 0) {
+                // AdBlocker detectado: Muestra el overlay y bloquea el scroll
+                overlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                console.warn("ADBLOCK DETECTADO: El uso de la página ha sido bloqueado.");
+            } else {
+                // No se detectó AdBlocker o el usuario lo ha deshabilitado
+                overlay.style.display = 'none';
+                document.body.style.overflow = '';
+            }
         }
         
         // --- CONFIGURACIÓN API ---
@@ -437,7 +518,7 @@
         };
 
         window.onload = () => {
-            loadTheme(); // Cargar y aplicar el tema guardado (o 'dark' por defecto)
+            loadTheme(); // Llama a checkAdBlock()
             lucide.createIcons();
             updateStatus();
             document.getElementById('hfTokenInput').value = HF_TOKEN;
@@ -599,6 +680,7 @@
 
         // --- GENERADOR PRINCIPAL ---
         async function generateDeck() {
+            
             const topic = document.getElementById('topicInput').value.trim();
             if(!topic) return showToast("Escribe un tema primero", 'error');
             
