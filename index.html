@@ -20,6 +20,7 @@
     
     <!-- LIBRERÍAS -->
     <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
@@ -196,6 +197,13 @@
         <div class="bg-card rounded-xl shadow-lg border border-border-color p-1 sticky top-20 z-20 mx-auto w-full max-w-2xl ring-1 ring-primary/10">
             <div class="flex flex-col sm:flex-row gap-1 p-1">
                 <input type="text" id="topicInput" placeholder="¿Sobre qué quieres tu presentación? Ej: Marketing Digital..." class="flex-1 bg-transparent border-0 rounded-lg px-4 py-3 text-base outline-none focus:ring-0 placeholder:text-secondary text-primary">
+                
+                <!-- NUEVO BOTÓN DE SUBIR PPTX -->
+                <label for="pptFileInput" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-3 rounded-lg font-bold text-sm shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer sm:w-auto w-full">
+                    <i data-lucide="upload" class="w-4 h-4"></i> Subir PPTX
+                </label>
+                <input type="file" id="pptFileInput" accept=".pptx" onchange="handleFileUpload(event)" class="hidden">
+
                 <button onclick="generateDeck()" class="bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-500 hover:to-pink-500 text-white px-8 py-3 rounded-lg font-bold text-sm shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 sm:w-auto w-full">
                     <i data-lucide="sparkles" class="w-4 h-4"></i> <span class="hidden sm:inline">Generar PPT</span><span class="sm:hidden">Generar</span>
                 </button>
@@ -271,6 +279,7 @@
                 <li>**Edición Conversacional Única:** ¿Necesitas un tono más formal o un texto más conciso? Usa el campo de edición por IA para modificar *al instante* el texto y las imágenes de la diapositiva activa mediante lenguaje natural.</li>
                 <li>**Exportación Universal (.pptx):** Total compatibilidad con Microsoft PowerPoint, Keynote de Apple y Google Slides, lo que garantiza que el producto final esté listo para ser presentado en cualquier entorno.</li>
                 <li>**Diseño Adaptativo y Modo Oscuro:** La interfaz está optimizada para la productividad tanto en dispositivos móviles como de escritorio, con un modo oscuro por defecto para reducir la fatiga visual.</li>
+                <li>**¡NUEVO! Carga y Edición de PPTX:** Sube tus presentaciones existentes, y la IA extraerá el texto de cada diapositiva para que puedas editar, resumir o cambiar el tono usando el editor conversacional.</li>
             </ul>
 
             <h3 class="text-xl font-bold text-primary mt-8 mb-3">Compromiso con la Calidad y la Seguridad</h3>
@@ -535,7 +544,6 @@
             document.getElementById('hfTokenInput').value = HF_TOKEN;
             
             // CORRECCIÓN: Ejecutar la detección de AdBlock con un ligero retraso (100ms) 
-            // para darle tiempo al AdBlocker a aplicar sus estilos.
             setTimeout(checkAdBlock, 100); 
         };
 
@@ -693,7 +701,169 @@
             if(text) document.getElementById('loaderTitle').innerText = text;
         }
 
-        // --- GENERADOR PRINCIPAL ---
+        // --- LÓGICA DE CARGA PPTX (MEJORADA) ---
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            showLoader(true, "Cargando Archivo...", file.name);
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const parsedSlides = await parsePptx(arrayBuffer);
+                
+                if (parsedSlides.length === 0) {
+                    throw new Error("No se pudo extraer contenido de ninguna diapositiva. Archivo vacío o incompatible.");
+                }
+
+                // Reiniciar el estado global con el contenido extraído
+                const html = document.documentElement;
+                const isDark = html.classList.contains('dark');
+                const theme = { 
+                    bg: isDark ? '#1e293b' : '#ffffff', 
+                    text: isDark ? '#f1f5f9' : '#1e293b', 
+                    accent: '#f97316' 
+                };
+                
+                pptTitle = file.name.replace('.pptx', ' (Editado)');
+                slides = parsedSlides.map((s, i) => ({ 
+                    ...s, 
+                    id: i, 
+                    bg: theme.bg, 
+                    text: theme.text, 
+                    lineColor: theme.accent, 
+                    imgLoading: false, 
+                    // Mantiene imageData y layout extraídos por parsePptx
+                }));
+
+                activeIndex = 0;
+                render();
+                showToast(`PPTX de ${slides.length} diapositivas cargado. ¡Imágenes y texto listos!`);
+                updateProgressBar(100, "Carga Completa", "Lista para edición con IA");
+                setTimeout(() => showLoader(false), 800);
+
+            } catch (error) {
+                console.error("Error al cargar PPTX:", error);
+                showToast(`Error de carga: ${error.message}`, 'error');
+                showLoader(false);
+            } finally {
+                // Limpiar el input para permitir subir el mismo archivo de nuevo
+                document.getElementById('pptFileInput').value = '';
+            }
+        }
+
+        async function parsePptx(arrayBuffer) {
+            const zip = new JSZip();
+            await zip.loadAsync(arrayBuffer);
+            const parser = new DOMParser();
+
+            const mediaMap = new Map();
+            // 1. Mapear archivos multimedia (imágenes)
+            const mediaFiles = zip.filter((relativePath) => 
+                relativePath.startsWith('ppt/media/') && (relativePath.endsWith('.png') || relativePath.endsWith('.jpg') || relativePath.endsWith('.jpeg'))
+            );
+            
+            // Convertir archivos multimedia a Base64 asincrónicamente
+            const mediaPromises = mediaFiles.map(file => 
+                file.async("base64").then(base64Data => {
+                    const mimeType = file.name.endsWith('.png') ? 'image/png' : 'image/jpeg';
+                    mediaMap.set(file.name.substring(file.name.lastIndexOf('/') + 1), `data:${mimeType};base64,${base64Data}`);
+                })
+            );
+            await Promise.all(mediaPromises);
+            
+            // 2. Filtrar archivos de diapositivas y ordenarlos numéricamente
+            const slideFiles = zip.filter((relativePath) => 
+                relativePath.startsWith('ppt/slides/slide') && relativePath.endsWith('.xml')
+            ).sort((a, b) => {
+                const numA = parseInt(a.name.match(/slide(\d+)\.xml/)[1]);
+                const numB = parseInt(b.name.match(/slide(\d+)\.xml/)[1]);
+                return numA - numB;
+            });
+
+            const parsedSlides = [];
+            
+            for (const file of slideFiles) {
+                const slideNumber = file.name.match(/slide(\d+)\.xml/)[1];
+                
+                // 3. Obtener archivo de relaciones (para vincular ID de imagen con el nombre de archivo)
+                const relPath = `ppt/slides/_rels/slide${slideNumber}.xml.rels`;
+                const relFile = zip.file(relPath);
+                
+                let relsDoc = null;
+                if (relFile) {
+                    const relXml = await relFile.async("text");
+                    relsDoc = parser.parseFromString(relXml, "application/xml");
+                }
+
+                // 4. Analizar XML de la diapositiva para texto y referencias de imagen
+                const xmlText = await file.async("text");
+                const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+                
+                // Extraer todo el texto (<a:t> tags)
+                const textRuns = xmlDoc.getElementsByTagName('a:t');
+                let textContent = Array.from(textRuns).map(t => t.textContent).join(' ').trim();
+                
+                // --- Extracción de Imagen y Layout ---
+                let imageData = null;
+                let imagePrompt = null;
+                
+                // Buscar referencias a imágenes
+                const imageRefs = xmlDoc.getElementsByTagName('a:blip');
+                if (imageRefs.length > 0 && relsDoc) {
+                    const embedId = imageRefs[0].getAttribute('r:embed');
+                    if (embedId) {
+                        // Encontrar el archivo Target de las relaciones
+                        const relationship = relsDoc.querySelector(`Relationship[Id="${embedId}"]`);
+                        if (relationship) {
+                            const targetPath = relationship.getAttribute('Target');
+                            // El Target es generalmente como '../media/image1.jpeg'
+                            const mediaFileName = targetPath.substring(targetPath.lastIndexOf('/') + 1);
+                            imageData = mediaMap.get(mediaFileName);
+                            
+                            if (imageData) {
+                                imagePrompt = `Imagen importada de la diapositiva original. Usar el prompt de edición IA para generar una nueva.`;
+                            }
+                        }
+                    }
+                }
+                
+                // --- Heurísticas de Diseño (Layout) y Título ---
+                let title = `Diapositiva ${slideNumber}`;
+                let content = textContent;
+                let layout = 'classic';
+                
+                // Heurística simple para título
+                if (textContent.length > 0) {
+                    // Dividir el contenido en título (primeras palabras) y cuerpo
+                    const words = textContent.split(/\s+/);
+                    title = words.slice(0, Math.min(10, words.length)).join(' ');
+                    content = words.slice(10).join(' ');
+                }
+
+                // Heurística de Layout: Si encontramos una imagen, usamos un diseño dividido.
+                if (imageData) {
+                    layout = (slideNumber === "1") ? 'background' : 'split_right'; 
+                } else {
+                    layout = 'classic';
+                }
+
+                if (textContent || imageData) {
+                    parsedSlides.push({ 
+                        title: title, 
+                        content: content,
+                        imagePrompt: imagePrompt || `Generar imagen temática para: ${title}`, 
+                        imageData: imageData, // Datos de imagen Base64
+                        layout: layout // Layout inferido
+                    });
+                }
+            }
+
+            return parsedSlides;
+        }
+
+
+        // --- GENERADOR PRINCIPAL (Mantiene la funcionalidad existente) ---
         async function generateDeck() {
             
             const topic = document.getElementById('topicInput').value.trim();
@@ -742,11 +912,12 @@
         }
 
         async function startImageGenerationQueue() {
-            const total = slides.filter(s => s.imagePrompt && s.layout !== 'classic').length;
+            const total = slides.filter(s => s.imagePrompt && s.layout !== 'classic' && !s.imageData).length; // Solo genera si no tiene imagen previa
             let done = 0;
             if (total === 0) return;
 
             for (let i = 0; i < slides.length; i++) {
+                // Solo generamos si NO tiene imageData Y tiene imagePrompt
                 if (slides[i].imagePrompt && !slides[i].imageData && slides[i].layout !== 'classic') {
                     updateProgressBar(30 + Math.round((done/total)*70), `Generando Imagen ${done+1}/${total}`, "Creando arte IA...");
                     slides[i].imgLoading = true;
@@ -769,7 +940,8 @@
             
             const s = slides[activeIndex];
             try {
-                const prompt = `Director de arte. Slide actual: "${s.content}". Prompt imagen: "${s.imagePrompt}". User: "${val}".
+                // Nota: Usamos el contenido actual de la diapositiva y el prompt de edición
+                const prompt = `Director de arte. Edita el siguiente contenido basado en la solicitud: Contenido actual: "${s.content}". Solicitud: "${val}".
                 Responde JSON: { "content": "...", "imagePrompt": "...", "layout": "..." }`;
                 
                 const rawText = await callGemini(prompt);
@@ -777,6 +949,7 @@
                 
                 if(data.content) s.content = data.content;
                 if(data.layout) s.layout = data.layout;
+                // Si la IA devuelve un nuevo prompt de imagen o la imagen existente es solo un marcador
                 if(data.imagePrompt && data.imagePrompt !== "null") {
                     updateProgressBar(50, "Nueva imagen...", "Generando...");
                     s.imagePrompt = data.imagePrompt;
