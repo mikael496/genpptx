@@ -1,4 +1,5 @@
 const ROUTELLM_BASE_URL = 'https://routellm.abacus.ai/v1';
+const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0'; // URL de la API de Hugging Face para SDXL
 
 // Función para obtener una clave de RouteLLM para texto
 const getRouteLLMTextKey = () => {
@@ -20,9 +21,6 @@ const getHuggingFaceKey = () => {
   }
   return hfKey;
 };
-
-// Inicializar Hugging Face Inference
-const hf = new HfInference(getHuggingFaceKey());
 
 async function handler(req, res) {
   if (req.method === 'POST') {
@@ -67,14 +65,30 @@ async function handler(req, res) {
       }
     } else if (action === 'image') {
       try {
-        const image = await hf.textToImage({
-          inputs: prompt,
-          parameters: {
-            negative_prompt: negative_prompt,
+        const hfApiKey = getHuggingFaceKey();
+
+        const response = await fetch(HUGGINGFACE_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${hfApiKey}`,
           },
+          body: JSON.stringify({
+            inputs: prompt,
+            parameters: {
+              negative_prompt: negative_prompt,
+            },
+          }),
         });
 
-        const arrayBuffer = await image.arrayBuffer();
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Hugging Face API error:', errorData);
+          return res.status(response.status).json({ error: errorData.error || 'Error from Hugging Face API' });
+        }
+
+        const imageBlob = await response.blob();
+        const arrayBuffer = await imageBlob.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         const base64Image = buffer.toString('base64');
 
