@@ -23,8 +23,18 @@ const getHuggingFaceKey = () => {
 };
 
 module.exports = async function handler(req, res) {
+  // Asegurarse de que el body esté parseado
+  let parsedBody = req.body;
+  if (typeof req.body === 'string') {
+    try {
+      parsedBody = JSON.parse(req.body);
+    } catch (e) {
+      return res.status(400).json({ error: 'Invalid JSON in request body.' });
+    }
+  }
+
   if (req.method === 'POST') {
-    const { action, prompt, negative_prompt } = req.body;
+    const { action, prompt, negative_prompt } = parsedBody;
 
     if (action === 'deck') {
       try {
