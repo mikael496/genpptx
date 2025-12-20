@@ -22,7 +22,7 @@ const getHuggingFaceKey = () => {
   return hfKey;
 };
 
-async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method === 'POST') {
     const { action, prompt, negative_prompt } = req.body;
 
@@ -103,4 +103,4 @@ async function handler(req, res) {
   } else {
     res.status(405).json({ error: 'Method not allowed' });
   }
-}
+};
