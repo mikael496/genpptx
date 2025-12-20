@@ -22,7 +22,7 @@ const getHuggingFaceKey = () => {
   return hfKey;
 };
 
-module.exports = async function handler(req, res) {
+async function handler(req, res) {
   // Asegurarse de que el body esté parseado
   let parsedBody = req.body;
   if (typeof req.body === 'string') {
