@@ -98,6 +98,8 @@ async function handler(req, res) {
               negative_prompt: negative_prompt,
             },
           }),
+
+module.exports = handler;
         });
 
         if (!response.ok) {
