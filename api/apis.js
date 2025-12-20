@@ -36,6 +36,15 @@ module.exports = async function handler(req, res) {
   if (req.method === 'POST') {
     const { action, prompt, negative_prompt } = parsedBody;
 
+    // --- NUEVA VALIDACIÓN --- //
+    if (!action) {
+      return res.status(400).json({ error: 'Missing action in request body.' });
+    }
+    if (action === 'deck' && !prompt) {
+      return res.status(400).json({ error: 'Missing prompt for deck action.' });
+    }
+    // --- FIN NUEVA VALIDACIÓN --- //
+
     if (action === 'deck') {
       try {
         const apiKey = getRouteLLMTextKey();
