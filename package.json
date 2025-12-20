@@ -1,0 +1,13 @@
+{
+  "name": "genpptx-api",
+  "version": "1.0.0",
+  "description": "API for genpptx project",
+  "main": "api/apis.js",
+  "scripts": {
+    "start": "node api/apis.js"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "type": "module"
+}
