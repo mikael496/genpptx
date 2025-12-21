@@ -10,7 +10,7 @@
     <meta name="google-adsense-account" content="ca-pub-1999008844241347"> 
 
     <!-- **** SCRIPT DE ANUNCIOS ADSENSE **** -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1999008844241347"
+    <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=h6zW326gY4VV2qi8uGy8Ixw5l6RNVaEJF89q96HuA7LTImXgTvGh4zEbrYo1zO7oWluyiC3_P8b5HsVMuqaHcw" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://gc.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9nZW5wcHR4LnZlcmNlbC5hcHAvP2Rldm1vZGU9dHJ1ZQ"/><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1999008844241347"
       crossorigin="anonymous"></script>
 
     <!-- FAVICON PREMIUM -->
@@ -631,8 +631,8 @@
         }
 
         async function callApi(payload, action) {
-            // Llama al único endpoint de backend: /api/apis.py
-            const response = await fetch(`/api/apis.py?action=${action}`, {
+            // Llama al único endpoint de backend: /api/apis.js
+            const response = await fetch(`/api/apis.js?action=${action}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -757,7 +757,7 @@
 
                 activeIndex = 0;
                 render();
-                showToast(`PPTX de ${slides.length} diapositivas cargado. ¡Imágenes y texto listos!`);
+                showToast(`PPTX de ${slides.length} diapositivas cargado. ¡Imágenes y texto listos...`);
                 updateProgressBar(100, "Carga Completa", "Lista para edición con IA");
                 setTimeout(() => showLoader(false), 800);
 
@@ -1066,7 +1066,7 @@
 
             // Función para obtener el color del texto de contraste para PPTX
             function getContrastTextColor(hexColor) {
-                // Si no es un HEX, asumimos que es un nombre de color (ej. 'dark blue')
+                // Si no es un HEX, asumimos que es un nombre simple (ej. 'dark blue')
                 if (!hexColor.startsWith('#')) {
                     // Si el nombre de color es 'dark', usamos blanco
                     if (hexColor.toLowerCase().includes('dark') || hexColor.toLowerCase().includes('black')) {
@@ -1128,3 +1128,4 @@
     </script>
 </body>
 </html>
+<script async data-explicit-opt-in="true" data-cookie-opt-in="true" data-deployment-id="dpl_3QWk3n9vHGkbi1bWp7NixsBZpLy5" src="https://vercel.live/_next-live/feedback/feedback.js"></script>
