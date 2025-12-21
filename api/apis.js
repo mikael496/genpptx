@@ -98,8 +98,6 @@ async function handler(req, res) {
               negative_prompt: negative_prompt,
             },
           }),
-
-module.exports = handler;
         });
 
         if (!response.ok) {
@@ -121,7 +119,10 @@ module.exports = handler;
     } else {
       res.status(400).json({ error: 'Invalid action' });
     }
-  } else {
+  }
+  else {
     res.status(405).json({ error: 'Method not allowed' });
   }
-};
+}
+
+module.exports = handler;
