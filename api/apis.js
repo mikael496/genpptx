@@ -1,128 +1,169 @@
-const ROUTELLM_BASE_URL = 'https://routellm.abacus.ai/v1';
-const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0'; // URL de la API de Hugging Face para SDXL
+// api/apis.js
+const fetch = require('node-fetch'); // Necesario para Node.js
 
-// Función para obtener una clave de RouteLLM para texto
-const getRouteLLMTextKey = () => {
-  const keys = [
+// Función para rotar claves de API
+const rotateKeys = (keys) => {
+    let currentIndex = 0;
+    return () => {
+        const key = keys[currentIndex];
+        currentIndex = (currentIndex + 1) % keys.length;
+        return key;
+    };
+};
+
+// --- CONFIGURACIÓN DE CLAVES Y MODELOS DE ROUTELLM ---
+// Claves para modelos de texto (RouteLLM)
+const ROUTELLM_TEXT_KEYS = [
     process.env.ROUTELLM_KEY_1,
-  ].filter(Boolean);
+    process.env.ROUTELLM_KEY_2,
+    process.env.ROUTELLM_KEY_3,
+    process.env.ROUTELLM_KEY_4
+].filter(Boolean); // Filtra valores nulos/indefinidos
 
-  if (keys.length === 0) {
-    throw new Error('No RouteLLM text API keys found. Please set ROUTELLM_KEY_1 in your environment variables.');
-  }
-  return keys[0];
-};
+// Claves para modelos de imagen (RouteLLM)
+const ROUTELLM_IMAGE_KEYS = [
+    process.env.ROUTELLM_IMAGE_KEY_1,
+    process.env.ROUTELLM_IMAGE_KEY_2,
+    process.env.ROUTELLM_IMAGE_KEY_3,
+    process.env.ROUTELLM_IMAGE_KEY_4,
+    process.env.ROUTELLM_IMAGE_KEY_5
+].filter(Boolean);
 
-// Función para obtener una clave de Hugging Face (para imágenes)
-const getHuggingFaceKey = () => {
-  const hfKey = process.env.HF_API_KEY;
-  if (!hfKey) {
-    throw new Error('No Hugging Face API key found. Please set HF_API_KEY in your environment variables.');
-  }
-  return hfKey;
-};
+// Modelos por defecto (si no se especifican en las variables de entorno)
+// ¡IMPORTANTE! Asegúrate de que estos modelos estén disponibles en tu plan de RouteLLM
+// y que sean los más económicos si esa es tu prioridad.
+// Si ROUTELLM_TEXT_MODEL no está definido, el código fallará, forzando la configuración.
+const ROUTELLM_TEXT_MODEL = process.env.ROUTELLM_TEXT_MODEL;
+const ROUTELLM_IMAGE_MODEL = process.env.ROUTELLM_IMAGE_MODEL; // Puede ser null si solo usas HF
 
-async function handler(req, res) {
-  // Asegurarse de que el body esté parseado
-  let parsedBody = req.body;
-  if (typeof req.body === 'string') {
-    try {
-      parsedBody = JSON.parse(req.body);
-    } catch (e) {
-      return res.status(400).json({ error: 'Invalid JSON in request body.' });
-    }
-  }
-
-  if (req.method === 'POST') {
-    const { action, prompt, negative_prompt } = parsedBody;
-
-    // --- NUEVA VALIDACIÓN --- //
-    if (!action) {
-      return res.status(400).json({ error: 'Missing action in request body.' });
-    }
-    if (action === 'deck' && !prompt) {
-      return res.status(400).json({ error: 'Missing prompt for deck action.' });
-    }
-    // --- FIN NUEVA VALIDACIÓN --- //
-
-    if (action === 'deck') {
-      try {
-        const apiKey = getRouteLLMTextKey();
-        const textModel = process.env.ROUTELLM_TEXT_MODEL;
-
-        if (!textModel) {
-          return res.status(500).json({ error: 'ROUTELLM_TEXT_MODEL environment variable is not set.' });
-        }
-
-        const response = await fetch(`${ROUTELLM_BASE_URL}/chat/completions`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-          },
-          body: JSON.stringify({
-            model: textModel,
-            messages: [
-              { role: 'system', content: 'You are a helpful assistant that generates presentation content.' },
-              { role: 'user', content: prompt },
-            ],
-            max_tokens: 2000,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error('RouteLLM API error:', errorData);
-          return res.status(response.status).json({ error: errorData.message || 'Error from RouteLLM API' });
-        }
-
-        const data = await response.json();
-        res.status(200).json(data);
-      } catch (error) {
-        console.error('Error in deck generation:', error);
-        res.status(500).json({ error: error.message });
-      }
-    } else if (action === 'image') {
-      try {
-        const hfApiKey = getHuggingFaceKey();
-
-        const response = await fetch(HUGGINGFACE_API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${hfApiKey}`,
-          },
-          body: JSON.stringify({
-            inputs: prompt,
-            parameters: {
-              negative_prompt: negative_prompt,
-            },
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Hugging Face API error:', errorData);
-          return res.status(response.status).json({ error: errorData.error || 'Error from Hugging Face API' });
-        }
-
-        const imageBlob = await response.blob();
-        const arrayBuffer = await imageBlob.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const base64Image = buffer.toString('base64');
-
-        res.status(200).json({ image: base64Image });
-      } catch (error) {
-        console.error('Error generating image with Hugging Face:', error);
-        res.status(500).json({ error: error.message });
-      }
-    } else {
-      res.status(400).json({ error: 'Invalid action' });
-    }
-  }
-  else {
-    res.status(405).json({ error: 'Method not allowed' });
-  }
+// Validar que al menos una clave de texto y un modelo de texto estén configurados
+if (ROUTELLM_TEXT_KEYS.length === 0) {
+    console.error("ERROR: No se ha configurado ninguna ROUTELLM_KEY_X para modelos de texto.");
+    // No lanzamos error aquí directamente para que el handler pueda devolver un 500 más amigable.
+}
+if (!ROUTELLM_TEXT_MODEL) {
+    console.error("ERROR: No se ha configurado ROUTELLM_TEXT_MODEL. Por favor, especifica un modelo de texto.");
 }
 
-handler;
+const getNextRouteLLMTextKey = rotateKeys(ROUTELLM_TEXT_KEYS);
+const getNextRouteLLMImageKey = rotateKeys(ROUTELLM_IMAGE_KEYS);
+
+// --- CONFIGURACIÓN DE HUGGING FACE (PARA IMÁGENES SI NO SE USA ROUTELLM) ---
+const HF_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
+const HF_TOKEN = process.env.HF_TOKEN; // Token de Hugging Face para el servidor
+
+// --- FUNCIÓN PRINCIPAL DEL HANDLER ---
+module.exports = async (req, res) => {
+    const { action } = req.query;
+    const { prompt, token } = req.body; // 'token' es el token personal de HF del usuario
+
+    res.setHeader('Content-Type', 'application/json');
+
+    try {
+        if (action === 'deck') {
+            if (!ROUTELLM_TEXT_MODEL || ROUTELLM_TEXT_KEYS.length === 0) {
+                throw new Error("Configuración de RouteLLM incompleta para modelos de texto. Revisa ROUTELLM_KEY_X y ROUTELLM_TEXT_MODEL.");
+            }
+
+            const ROUTELLM_KEY = getNextRouteLLMTextKey();
+            const ROUTELLM_API_URL = "https://routellm.abacus.ai/v1/chat/completions";
+
+            const response = await fetch(ROUTELLM_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${ROUTELLM_KEY}`
+                },
+                body: JSON.stringify({
+                    model: ROUTELLM_TEXT_MODEL,
+                    messages: [{ role: "user", content: prompt }],
+                    temperature: 0.7,
+                    max_tokens: 1500,
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("Error de RouteLLM (Texto):", errorData);
+                throw new Error(`Error de RouteLLM: ${errorData.detail || response.statusText}`);
+            }
+
+            const data = await response.json();
+            const text = data.choices[0].message.content;
+            return res.status(200).json({ text });
+
+        } else if (action === 'image') {
+            // Priorizar RouteLLM para imágenes si está configurado
+            if (ROUTELLM_IMAGE_MODEL && ROUTELLM_IMAGE_KEYS.length > 0) {
+                const ROUTELLM_KEY = getNextRouteLLMImageKey();
+                const ROUTELLM_API_URL = "https://routellm.abacus.ai/v1/images/generations";
+
+                const response = await fetch(ROUTELLM_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${ROUTELLM_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: ROUTELLM_IMAGE_MODEL,
+                        prompt: prompt,
+                        n: 1,
+                        size: "1024x576", // Ajustado para 16:9
+                        response_format: "b64_json"
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error("Error de RouteLLM (Imagen):", errorData);
+                    // Si RouteLLM falla, intentamos con Hugging Face como fallback
+                    console.warn("RouteLLM Image Generation Fallback to Hugging Face due to error.");
+                    return await handleHuggingFaceImage(prompt, token, res);
+                }
+
+                const data = await response.json();
+                const image = `data:image/png;base64,${data.data[0].b64_json}`;
+                return res.status(200).json({ image });
+
+            } else {
+                // Usar Hugging Face si RouteLLM para imágenes no está configurado
+                return await handleHuggingFaceImage(prompt, token, res);
+            }
+
+        } else {
+            return res.status(400).json({ error: 'Acción no válida.' });
+        }
+    } catch (error) {
+        console.error("Error en el handler:", error);
+        return res.status(500).json({ error: error.message || 'Error interno del servidor.' });
+    }
+};
+
+// Función auxiliar para manejar la generación de imágenes con Hugging Face
+async function handleHuggingFaceImage(prompt, userToken, res) {
+    const finalToken = userToken || HF_TOKEN;
+    if (!finalToken) {
+        throw new Error("No se ha configurado un token de Hugging Face para la generación de imágenes.");
+    }
+
+    const hfResponse = await fetch(HF_API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${finalToken}`
+        },
+        body: JSON.stringify({ inputs: prompt, parameters: { width: 1024, height: 576 } })
+    });
+
+    if (!hfResponse.ok) {
+        const errorText = await hfResponse.text();
+        console.error("Error de Hugging Face:", errorText);
+        throw new Error(`Error de Hugging Face: ${errorText}`);
+    }
+
+    const imageBlob = await hfResponse.blob();
+    const buffer = await imageBlob.arrayBuffer();
+    const base64Image = Buffer.from(buffer).toString('base64');
+    const image = `data:image/png;base64,${base64Image}`;
+    return res.status(200).json({ image });
+}
