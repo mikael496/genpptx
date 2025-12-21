@@ -1,5 +1,6 @@
 // api/apis.js
-const fetch = require('node-fetch'); // Necesario para Node.js
+import fetch from 'node-fetch'; // Usamos import en lugar de require
+import { Buffer } from 'buffer'; // Importamos Buffer explícitamente
 
 // Función para rotar claves de API
 const rotateKeys = (keys) => {
@@ -30,16 +31,12 @@ const ROUTELLM_IMAGE_KEYS = [
 ].filter(Boolean);
 
 // Modelos por defecto (si no se especifican en las variables de entorno)
-// ¡IMPORTANTE! Asegúrate de que estos modelos estén disponibles en tu plan de RouteLLM
-// y que sean los más económicos si esa es tu prioridad.
-// Si ROUTELLM_TEXT_MODEL no está definido, el código fallará, forzando la configuración.
 const ROUTELLM_TEXT_MODEL = process.env.ROUTELLM_TEXT_MODEL;
 const ROUTELLM_IMAGE_MODEL = process.env.ROUTELLM_IMAGE_MODEL; // Puede ser null si solo usas HF
 
 // Validar que al menos una clave de texto y un modelo de texto estén configurados
 if (ROUTELLM_TEXT_KEYS.length === 0) {
     console.error("ERROR: No se ha configurado ninguna ROUTELLM_KEY_X para modelos de texto.");
-    // No lanzamos error aquí directamente para que el handler pueda devolver un 500 más amigable.
 }
 if (!ROUTELLM_TEXT_MODEL) {
     console.error("ERROR: No se ha configurado ROUTELLM_TEXT_MODEL. Por favor, especifica un modelo de texto.");
@@ -53,7 +50,8 @@ const HF_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stab
 const HF_TOKEN = process.env.HF_TOKEN; // Token de Hugging Face para el servidor
 
 // --- FUNCIÓN PRINCIPAL DEL HANDLER ---
-module.exports = async (req, res) => {
+// Usamos 'export default' para exportar la función en ES Modules
+export default async (req, res) => {
     const { action } = req.query;
     const { prompt, token } = req.body; // 'token' es el token personal de HF del usuario
 
@@ -152,7 +150,7 @@ async function handleHuggingFaceImage(prompt, userToken, res) {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${finalToken}`
         },
-        body: JSON.stringify({ inputs: prompt, parameters: { width: 1024, height: 576 } })
+        body: JSON.stringify({ inputs: prompt, parameters: { width: 1024, height: 576 })
     });
 
     if (!hfResponse.ok) {
